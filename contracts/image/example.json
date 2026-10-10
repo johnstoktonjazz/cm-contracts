@@ -1,0 +1,21 @@
+{
+  "file": "map_north_part.png",
+  "kind": "map",
+  "title": "Северная часть территории поверх кварталов проекта планировки",
+  "source": "ППТ 2021, чертеж красных линий; кадастр — выписки ЕГРН, октябрь 2026",
+  "date": "2026-10-11",
+  "status": "official",
+  "size_mm": { "width": 252.0, "height": 188.0 },
+  "dpi": 300,
+  "crs": "МСК-05 зона 2",
+  "scale": "1:5000",
+  "layers": [
+    { "name": "граница проекта планировки", "source": "ППТ 2021, лист 2", "status": "official", "date": "2021-06-01" },
+    { "name": "кварталы", "source": "ППТ 2021, лист 2", "status": "official", "date": "2021-06-01" },
+    { "name": "участки", "source": "ЕГРН, КПТ", "status": "cadastral", "date": "2026-10-01" },
+    { "name": "северная часть", "source": "допущение ASM-0003", "status": "digitized", "date": "2026-10-09" },
+    { "name": "подложка", "source": "OpenStreetMap, ODbL", "status": "reference", "date": "2026-10-10" }
+  ],
+  "legend_file": "map_north_part.legend.png",
+  "fact_ids": ["F-000412", "ASM-0003"]
+}

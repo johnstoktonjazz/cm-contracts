@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cm-contracts/image/1.0.0",
+  "title": "Сопроводительное описание картинки (*.provenance.json)",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["file", "kind", "source", "status", "size_mm"],
+  "additionalProperties": false,
+  "properties": {
+    "file": { "type": "string", "description": "имя файла картинки рядом: PNG или SVG" },
+    "kind": {
+      "type": "string",
+      "enum": ["map", "scheme", "plan", "axonometry", "photo", "photomontage", "render", "chart"],
+      "description": "тип по принципу 11: карта, схема, план, аксонометрия, фото, фотомонтаж, рендер, диаграмма"
+    },
+    "title": { "type": "string", "description": "подпись к картинке, одна строка" },
+    "source": { "type": "string", "description": "готовая подпись источника геометрии или съемки для подвала" },
+    "date": { "type": "string", "description": "дата съемки или редакции данных, ISO или «нужен документ»" },
+    "point": { "type": "string", "description": "точка и направление съемки для видов; пусто для карт и схем" },
+    "status": {
+      "type": "string",
+      "enum": ["official", "cadastral", "digitized", "concept", "analog", "placeholder"],
+      "description": "откуда геометрия: утвержденный документ, кадастр, оцифровано с картинки, концепция, аналог, заглушка"
+    },
+    "size_mm": {
+      "type": "object",
+      "required": ["width", "height"],
+      "properties": { "width": { "type": "number" }, "height": { "type": "number" } },
+      "additionalProperties": false,
+      "description": "размер, под который картинка собрана; равен месту макета — верстка не масштабирует карты и схемы (Д-006)"
+    },
+    "dpi": { "type": "integer", "description": "для PNG; карты и схемы не ниже 300, фото не ниже 150" },
+    "crs": { "type": "string", "description": "для карт: система координат данных, например МСК-05 зона 2 или EPSG:32638" },
+    "scale": { "type": "string", "description": "для карт: знаменатель масштаба при печати на size_mm, например 1:5000" },
+    "layers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "source"],
+        "properties": {
+          "name": { "type": "string" },
+          "source": { "type": "string" },
+          "status": { "type": "string", "enum": ["official", "cadastral", "digitized", "concept", "reference"] },
+          "date": { "type": "string" }
+        },
+        "additionalProperties": false
+      },
+      "description": "для карт: слои и источник каждого; verstka строит из них легенду и подпись источников"
+    },
+    "legend_file": { "type": "string", "description": "отдельная картинка легенды в натуральную величину (Д-040)" },
+    "fact_ids": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^(F-[0-9]{6}|CALC-[0-9]{5}|NORM-[0-9]{5}|ASM-[0-9]{4})$" },
+      "description": "записи реестра, которые картинка показывает или доказывает"
+    },
+    "analog": { "type": "boolean", "description": "материал аналога, не проектное решение" }
+  },
+  "allOf": [
+    { "if": { "properties": { "kind": { "const": "map" } } }, "then": { "required": ["crs", "layers", "scale"] } },
+    { "if": { "properties": { "kind": { "enum": ["photo", "photomontage", "render"] } } }, "then": { "required": ["date", "point"] } }
+  ]
+}

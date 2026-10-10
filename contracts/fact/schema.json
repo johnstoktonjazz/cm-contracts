@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cm-contracts/fact/1.0.0",
+  "title": "Запись реестра: факт, расчет, норма, допущение",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["id", "kind", "value", "status", "sources"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^(F-[0-9]{6}|CALC-[0-9]{5}|NORM-[0-9]{5}|ASM-[0-9]{4})$",
+      "description": "F — факт из документа, CALC — вычисленное значение, NORM — требование нормы, ASM — допущение автора проекта"
+    },
+    "kind": { "type": "string", "enum": ["fact", "calc", "norm", "assumption"] },
+    "subject": {
+      "type": "string",
+      "description": "О чем запись: объект и показатель словами, как в документе. Пример: «участок 1, площадь»"
+    },
+    "value": {
+      "description": "Значение как в источнике: число, текст или диапазон. Число — без форматирования, точка как разделитель",
+      "oneOf": [
+        { "type": "number" },
+        { "type": "string" },
+        { "type": "object", "required": ["min", "max"], "properties": { "min": { "type": "number" }, "max": { "type": "number" } }, "additionalProperties": false }
+      ]
+    },
+    "unit": { "type": "string", "description": "га, м2, чел., м, машино-мест, %; пусто для текста" },
+    "status": {
+      "type": "string",
+      "enum": ["verified", "check", "conflict", "superseded"],
+      "description": "verified — сверено с источником; check — не сверено или источник не подтвержден; conflict — источники расходятся, см. conflicts_with; superseded — заменено новой редакцией, см. superseded_by"
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["doc_id", "label"],
+        "additionalProperties": false,
+        "properties": {
+          "doc_id": { "type": "string", "description": "идентификатор документа в реестре документов проекта" },
+          "label": { "type": "string", "description": "подпись для подвала слайда, готовая строка. Пример: «ППТ, том 1, табл. 3, с. 22»" },
+          "page": { "type": "integer", "minimum": 1 },
+          "clause": { "type": "string", "description": "пункт, статья, таблица, строка" },
+          "doc_class": { "type": "string", "pattern": "^[A-J]$", "description": "класс документа по правилам актуальности ядра" },
+          "doc_status": { "type": "string", "enum": ["approved", "draft", "external", "reference"], "description": "утвержден, проект, чужой документ, справочный источник" }
+        }
+      }
+    },
+    "inputs": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^(F-[0-9]{6}|CALC-[0-9]{5}|NORM-[0-9]{5}|ASM-[0-9]{4})$" },
+      "description": "только для CALC: идентификаторы входов"
+    },
+    "formula": { "type": "string", "description": "только для CALC: формула словами или выражением с идентификаторами входов" },
+    "applicability": {
+      "type": "string",
+      "description": "только для NORM: условия применения словами (территориальная группа, категория города, тип объекта); статус проверки — в status"
+    },
+    "author": { "type": "string", "description": "только для ASM: кто принял допущение" },
+    "date": { "type": "string", "format": "date", "description": "дата записи или допущения" },
+    "conflicts_with": { "type": "array", "items": { "type": "string" } },
+    "superseded_by": { "type": "string" },
+    "note": { "type": "string", "maxLength": 300 }
+  },
+  "allOf": [
+    { "if": { "properties": { "kind": { "const": "calc" } } }, "then": { "required": ["inputs", "formula"] } },
+    { "if": { "properties": { "kind": { "const": "assumption" } } }, "then": { "required": ["author", "date"] } },
+    { "if": { "properties": { "status": { "const": "conflict" } } }, "then": { "required": ["conflicts_with"] } }
+  ]
+}
