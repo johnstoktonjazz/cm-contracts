@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cm-contracts/geopackage/1.0.0",
+  "title": "Геопакет проекта: слои и обязательные поля",
+  "version": "1.0.0",
+  "description": "Описывает один файл <project>.gpkg. Проверяется скриптом картографа: имена слоев из перечня, обязательные поля есть у каждого объекта, одна система координат на файл.",
+  "type": "object",
+  "required": ["crs", "layers"],
+  "additionalProperties": false,
+  "properties": {
+    "crs": {
+      "type": "string",
+      "description": "единая система координат файла, как в project.yaml: EPSG-код или именованная МСК с зоной"
+    },
+    "project": { "type": "string", "description": "имя проекта из project.yaml" },
+    "built": { "type": "string", "format": "date-time" },
+    "layers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "geometry", "features"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": [
+              "boundary_project", "boundary_planning", "red_lines", "blocks", "sites",
+              "parcels", "buildings_cadastre", "zouit", "zones_pzz", "zones_genplan",
+              "roads", "rail", "transit_stops", "buildings_osm", "green", "water",
+              "poi_education", "poi_health", "poi_culture", "poi_hotels", "poi_other",
+              "heritage", "accidents", "isochrones", "buffers", "concept_objects", "concept_sites",
+              "basemap_extent"
+            ],
+            "description": "фиксированный перечень; новый слой — новая версия контракта"
+          },
+          "geometry": { "type": "string", "enum": ["Point", "LineString", "Polygon", "MultiPolygon", "MultiLineString"] },
+          "features": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/feature" }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "feature": {
+      "type": "object",
+      "required": ["object_id", "kind", "status", "source_label", "source_date"],
+      "properties": {
+        "object_id": {
+          "type": "string",
+          "pattern": "^[a-z_]+:[A-Za-z0-9._-]+$",
+          "description": "устойчивый идентификатор «слой:ключ»; не меняется между сборками. Пример: sites:3, parcels:05-40-000012-17"
+        },
+        "name": { "type": "string", "description": "название как в документе; пусто для безымянных" },
+        "kind": { "type": "string", "description": "тип объекта словами по словарю слоя: квартал, участок концепции, школа, остановка, ЗОУИТ-СЗЗ" },
+        "status": {
+          "type": "string",
+          "enum": ["official", "cadastral", "digitized", "concept", "reference"],
+          "description": "статус геометрии; повышается только документом"
+        },
+        "source_doc": { "type": "string", "description": "идентификатор документа в реестре базы, если источник — документ проекта" },
+        "source_label": { "type": "string", "description": "готовая подпись источника: документ и лист, номер выписки, имя внешнего источника с лицензией" },
+        "source_date": { "type": "string", "description": "дата документа или выгрузки, ISO" },
+        "fact_ids": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^(F-[0-9]{6}|CALC-[0-9]{5}|NORM-[0-9]{5}|ASM-[0-9]{4})$" },
+          "description": "записи реестра, относящиеся к объекту: площадь по ТЭП, вместимость, норматив"
+        },
+        "attrs": {
+          "type": "object",
+          "description": "свободные атрибуты слоя: номер квартала, кадастровый номер, вид разрешенного использования, вместимость; без проектных констант в именах полей"
+        },
+        "digitized_from": { "type": "string", "description": "обязательно при status=digitized: с какого документа или слайда, кем и когда" }
+      },
+      "allOf": [
+        { "if": { "properties": { "status": { "const": "digitized" } } }, "then": { "required": ["digitized_from"] } }
+      ]
+    }
+  }
+}

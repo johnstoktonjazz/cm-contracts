@@ -1,0 +1,68 @@
+{
+  "crs": "EPSG:32638",
+  "project": "Приречный",
+  "built": "2026-10-11T12:00:00Z",
+  "layers": [
+    {
+      "name": "boundary_planning",
+      "geometry": "Polygon",
+      "features": [
+        {
+          "object_id": "boundary_planning:ppt-2021",
+          "name": "граница проекта планировки",
+          "kind": "граница ППТ",
+          "status": "official",
+          "source_doc": "DOC-0007",
+          "source_label": "ППТ 2021, чертеж красных линий, лист 2",
+          "source_date": "2021-06-01",
+          "fact_ids": ["F-000401"]
+        }
+      ]
+    },
+    {
+      "name": "parcels",
+      "geometry": "MultiPolygon",
+      "features": [
+        {
+          "object_id": "parcels:00-00-000001-12",
+          "kind": "земельный участок",
+          "status": "cadastral",
+          "source_label": "ЕГРН, КПТ от 01.10.2026",
+          "source_date": "2026-10-01",
+          "attrs": { "cadastral_number": "00:00:000001:12", "permitted_use": "образование и просвещение" }
+        }
+      ]
+    },
+    {
+      "name": "concept_sites",
+      "geometry": "Polygon",
+      "features": [
+        {
+          "object_id": "concept_sites:3",
+          "name": "участок 3",
+          "kind": "участок концепции",
+          "status": "digitized",
+          "source_label": "оцифровано со слайда 12 альбома концепции, ред. 5",
+          "source_date": "2026-10-09",
+          "digitized_from": "альбом концепции ред. 5, слайд 12; оцифровка 09.10.2026",
+          "fact_ids": ["F-000412"]
+        }
+      ]
+    },
+    {
+      "name": "poi_education",
+      "geometry": "Point",
+      "features": [
+        {
+          "object_id": "poi_education:school-4",
+          "name": "школа № 4",
+          "kind": "общеобразовательная школа",
+          "status": "reference",
+          "source_label": "bus.gov.ru, выгрузка 10.10.2026; OSM, ODbL, 10.10.2026 — совпадают",
+          "source_date": "2026-10-10",
+          "attrs": { "capacity": 825, "confirmed_by": ["bus.gov.ru", "osm"] }
+        }
+      ]
+    }
+  ]
+}
