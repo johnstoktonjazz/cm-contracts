@@ -1,11 +1,12 @@
 {
+  "contract": "geopackage/1.1.0",
   "crs": "EPSG:32638",
   "project": "Приречный",
-  "built": "2026-10-11T12:00:00Z",
+  "input_hash": "sha256:5f1c0d6a0b3e2f4c8d9a7b6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6c",
   "layers": [
     {
       "name": "boundary_planning",
-      "geometry": "Polygon",
+      "geometry": "MultiPolygon",
       "features": [
         {
           "object_id": "boundary_planning:ppt-2021",
@@ -20,6 +21,23 @@
       ]
     },
     {
+      "name": "blocks",
+      "geometry": "MultiPolygon",
+      "features": [
+        {
+          "object_id": "blocks:2",
+          "name": "квартал 2",
+          "kind": "квартал ППТ",
+          "status": "official",
+          "source_doc": "DOC-0007",
+          "source_label": "ППТ 2021, чертеж красных линий, лист 2",
+          "source_date": "2021-06-01",
+          "fact_ids": ["F-000520"],
+          "attrs": { "num": "2" }
+        }
+      ]
+    },
+    {
       "name": "parcels",
       "geometry": "MultiPolygon",
       "features": [
@@ -29,13 +47,30 @@
           "status": "cadastral",
           "source_label": "ЕГРН, КПТ от 01.10.2026",
           "source_date": "2026-10-01",
-          "attrs": { "cadastral_number": "00:00:000001:12", "permitted_use": "образование и просвещение" }
+          "fact_ids": [],
+          "attrs": { "cadastral_number": "00:00:000001:12", "permitted_use": "образование и просвещение", "land_category": "земли населенных пунктов" }
+        }
+      ]
+    },
+    {
+      "name": "zouit",
+      "geometry": "MultiPolygon",
+      "features": [
+        {
+          "object_id": "zouit:00-00-6.123",
+          "name": "санитарно-защитная зона котельной",
+          "kind": "СЗЗ",
+          "status": "cadastral",
+          "source_label": "ЕГРН, КПТ от 01.10.2026, реестровый номер 00:00-6.123",
+          "source_date": "2026-10-01",
+          "fact_ids": ["NORM-00012"],
+          "attrs": { "zouit_type": "sanitary", "registry_number": "00:00-6.123" }
         }
       ]
     },
     {
       "name": "concept_sites",
-      "geometry": "Polygon",
+      "geometry": "MultiPolygon",
       "features": [
         {
           "object_id": "concept_sites:3",
@@ -44,8 +79,26 @@
           "status": "digitized",
           "source_label": "оцифровано со слайда 12 альбома концепции, ред. 5",
           "source_date": "2026-10-09",
-          "digitized_from": "альбом концепции ред. 5, слайд 12; оцифровка 09.10.2026",
-          "fact_ids": ["F-000412"]
+          "digitized_from": "альбом концепции ред. 5, слайд 12; оцифровка 09.10.2026, картограф",
+          "fact_ids": ["F-000412"],
+          "attrs": { "num": "3" }
+        }
+      ]
+    },
+    {
+      "name": "roads",
+      "geometry": "MultiLineString",
+      "features": [
+        {
+          "object_id": "roads:osm-w100200300",
+          "name": "улица Садовая",
+          "kind": "магистральная улица",
+          "status": "reference",
+          "source_label": "OpenStreetMap через Overture Maps 2026-09-23.0",
+          "source_date": "2026-09-23",
+          "source_license": "ODbL 1.0",
+          "fact_ids": [],
+          "attrs": { "road_class": "main", "tunnel": false }
         }
       ]
     },
@@ -54,13 +107,31 @@
       "geometry": "Point",
       "features": [
         {
-          "object_id": "poi_education:school-4",
+          "object_id": "poi_education:osm-n400500600",
           "name": "школа № 4",
           "kind": "общеобразовательная школа",
           "status": "reference",
-          "source_label": "bus.gov.ru, выгрузка 10.10.2026; OSM, ODbL, 10.10.2026 — совпадают",
+          "source_label": "bus.gov.ru, выгрузка 10.10.2026; OpenStreetMap, 10.10.2026 — совпадают",
           "source_date": "2026-10-10",
-          "attrs": { "capacity": 825, "confirmed_by": ["bus.gov.ru", "osm"] }
+          "source_license": "ODbL 1.0; открытые данные bus.gov.ru",
+          "fact_ids": [],
+          "attrs": { "poi_type": "school", "capacity": 825, "confirmed_by": ["bus.gov.ru", "osm"] }
+        }
+      ]
+    },
+    {
+      "name": "isochrones",
+      "geometry": "MultiPolygon",
+      "features": [
+        {
+          "object_id": "isochrones:walk-15-transit_stops-osm-n700800900",
+          "kind": "пешеходная доступность",
+          "status": "reference",
+          "source_label": "расчет картографа по графу OpenStreetMap (Overture Maps 2026-09-23.0), 4,8 км/ч",
+          "source_date": "2026-09-23",
+          "source_license": "ODbL 1.0",
+          "fact_ids": ["CALC-00031", "ASM-0101"],
+          "attrs": { "mode": "walk", "minutes": 15, "speed_kmh": 4.8, "origin_id": "transit_stops:osm-n700800900" }
         }
       ]
     }

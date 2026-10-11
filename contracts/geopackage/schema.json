@@ -1,81 +1,1222 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "cm-contracts/geopackage/1.0.0",
-  "title": "Геопакет проекта: слои и обязательные поля",
-  "version": "1.0.0",
-  "description": "Описывает один файл <project>.gpkg. Проверяется скриптом картографа: имена слоев из перечня, обязательные поля есть у каждого объекта, одна система координат на файл.",
+  "$id": "cm-contracts/geopackage/1.1.0",
+  "title": "Геопакет проекта: слои, геометрия и поля",
+  "version": "1.1.0",
+  "description": "Описывает один файл <project>.gpkg в виде JSON-выгрузки (example.json). Как это лежит в самом GPKG — README, «Хранение». Проверяется скриптом картографа при каждой сборке.",
   "type": "object",
-  "required": ["crs", "layers"],
+  "required": [
+    "contract",
+    "crs",
+    "layers"
+  ],
   "additionalProperties": false,
   "properties": {
+    "contract": {
+      "const": "geopackage/1.1.0"
+    },
     "crs": {
       "type": "string",
-      "description": "единая система координат файла, как в project.yaml: EPSG-код или именованная МСК с зоной"
+      "description": "имя системы координат из project.yaml (crs.name): EPSG-код или МСК с зоной; одна на файл"
     },
-    "project": { "type": "string", "description": "имя проекта из project.yaml" },
-    "built": { "type": "string", "format": "date-time" },
+    "project": {
+      "type": "string",
+      "description": "имя проекта из project.yaml"
+    },
+    "input_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "хэш входов сборки (файлы, правила, параметры); вместо времени сборки — повторная сборка дает тот же файл"
+    },
     "layers": {
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["name", "geometry", "features"],
+        "required": [
+          "name",
+          "geometry",
+          "features"
+        ],
         "additionalProperties": false,
         "properties": {
           "name": {
             "type": "string",
             "enum": [
-              "boundary_project", "boundary_planning", "red_lines", "blocks", "sites",
-              "parcels", "buildings_cadastre", "zouit", "zones_pzz", "zones_genplan",
-              "roads", "rail", "transit_stops", "buildings_osm", "green", "water",
-              "poi_education", "poi_health", "poi_culture", "poi_hotels", "poi_other",
-              "heritage", "accidents", "isochrones", "buffers", "concept_objects", "concept_sites",
-              "basemap_extent"
+              "boundary_project",
+              "boundary_planning",
+              "red_lines",
+              "blocks",
+              "sites",
+              "parcels",
+              "buildings_cadastre",
+              "zouit",
+              "zones_pzz",
+              "zones_genplan",
+              "roads",
+              "rail",
+              "transit_stops",
+              "buildings_osm",
+              "green",
+              "water",
+              "poi_education",
+              "poi_health",
+              "poi_culture",
+              "poi_hotels",
+              "poi_other",
+              "heritage",
+              "accidents",
+              "isochrones",
+              "buffers",
+              "concept_objects",
+              "concept_sites"
             ],
-            "description": "фиксированный перечень; новый слой — новая версия контракта"
+            "description": "закрытый перечень; новый слой — новая версия контракта"
           },
-          "geometry": { "type": "string", "enum": ["Point", "LineString", "Polygon", "MultiPolygon", "MultiLineString"] },
+          "geometry": {
+            "type": "string",
+            "enum": [
+              "MultiPolygon",
+              "MultiLineString",
+              "Point"
+            ],
+            "description": "одна на слой, по перечню: площади — MultiPolygon, линии — MultiLineString, точки — Point"
+          },
           "features": {
             "type": "array",
-            "items": { "$ref": "#/$defs/feature" }
+            "items": {
+              "$ref": "#/$defs/feature"
+            }
           }
-        }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "boundary_project"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "MultiPolygon"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "boundary_planning"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "MultiPolygon"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "red_lines"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "MultiLineString"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "state": {
+                            "type": "string",
+                            "enum": [
+                              "existing",
+                              "planned",
+                              "cancelled"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "blocks"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "MultiPolygon"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "num": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "sites"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "MultiPolygon"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "num": {
+                            "type": "string"
+                          },
+                          "purpose": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "parcels"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "MultiPolygon"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "cadastral_number": {
+                            "type": "string"
+                          },
+                          "permitted_use": {
+                            "type": "string"
+                          },
+                          "land_category": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "buildings_cadastre"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "MultiPolygon"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "cadastral_number": {
+                            "type": "string"
+                          },
+                          "purpose": {
+                            "type": "string"
+                          },
+                          "floors": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "zouit"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "MultiPolygon"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "zouit_type": {
+                            "type": "string",
+                            "enum": [
+                              "sanitary",
+                              "water_protection",
+                              "coastal_strip",
+                              "roadside",
+                              "right_of_way",
+                              "heritage_protection",
+                              "airfield",
+                              "utility_protection",
+                              "other"
+                            ]
+                          },
+                          "registry_number": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "zones_pzz"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "MultiPolygon"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "zone": {
+                            "type": "string",
+                            "enum": [
+                              "Ж",
+                              "ОЖ",
+                              "ОД",
+                              "П",
+                              "ИТ",
+                              "Р",
+                              "СН"
+                            ]
+                          },
+                          "code": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "zones_genplan"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "MultiPolygon"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "zone": {
+                            "type": "string",
+                            "enum": [
+                              "Ж",
+                              "ОЖ",
+                              "ОД",
+                              "П",
+                              "ИТ",
+                              "Р",
+                              "СН"
+                            ]
+                          },
+                          "code": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "roads"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "MultiLineString"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "road_class": {
+                            "type": "string",
+                            "enum": [
+                              "express",
+                              "main",
+                              "district",
+                              "local",
+                              "pedestrian",
+                              "service",
+                              "path"
+                            ]
+                          },
+                          "tunnel": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "rail"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "MultiLineString"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "rail_class": {
+                            "type": "string",
+                            "enum": [
+                              "main",
+                              "siding",
+                              "tram",
+                              "subway"
+                            ]
+                          },
+                          "tunnel": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "transit_stops"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "Point"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "mode": {
+                            "type": "string",
+                            "enum": [
+                              "bus",
+                              "trolleybus",
+                              "tram",
+                              "rail",
+                              "subway",
+                              "ferry"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "buildings_osm"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "MultiPolygon"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "floors": {
+                            "type": "integer"
+                          },
+                          "building_use": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "green"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "MultiPolygon"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "green_class": {
+                            "type": "string",
+                            "enum": [
+                              "park",
+                              "forest",
+                              "garden",
+                              "cemetery",
+                              "other"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "water"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "MultiPolygon"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "water_class": {
+                            "type": "string",
+                            "enum": [
+                              "sea",
+                              "river",
+                              "lake",
+                              "reservoir",
+                              "canal",
+                              "other"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "poi_education"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "Point"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "poi_type": {
+                            "type": "string"
+                          },
+                          "capacity": {
+                            "type": "integer"
+                          },
+                          "confirmed_by": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "poi_health"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "Point"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "poi_type": {
+                            "type": "string"
+                          },
+                          "capacity": {
+                            "type": "integer"
+                          },
+                          "confirmed_by": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "poi_culture"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "Point"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "poi_type": {
+                            "type": "string"
+                          },
+                          "capacity": {
+                            "type": "integer"
+                          },
+                          "confirmed_by": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "poi_hotels"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "Point"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "poi_type": {
+                            "type": "string"
+                          },
+                          "capacity": {
+                            "type": "integer"
+                          },
+                          "confirmed_by": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "poi_other"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "Point"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "poi_type": {
+                            "type": "string"
+                          },
+                          "capacity": {
+                            "type": "integer"
+                          },
+                          "confirmed_by": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "heritage"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "Point"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "registry_number": {
+                            "type": "string"
+                          },
+                          "category": {
+                            "type": "string",
+                            "enum": [
+                              "federal",
+                              "regional",
+                              "local",
+                              "identified"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "accidents"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "Point"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "date": {
+                            "type": "string"
+                          },
+                          "severity": {
+                            "type": "string",
+                            "enum": [
+                              "fatal",
+                              "injury",
+                              "damage"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "isochrones"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "MultiPolygon"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "mode": {
+                            "type": "string",
+                            "enum": [
+                              "walk",
+                              "drive",
+                              "transit"
+                            ]
+                          },
+                          "minutes": {
+                            "type": "number"
+                          },
+                          "speed_kmh": {
+                            "type": "number"
+                          },
+                          "origin_id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "buffers"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "MultiPolygon"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "buffer_type": {
+                            "type": "string"
+                          },
+                          "distance_m": {
+                            "type": "number"
+                          },
+                          "origin_id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "concept_objects"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "MultiPolygon"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "num": {
+                            "type": "string"
+                          },
+                          "purpose": {
+                            "type": "string"
+                          },
+                          "floors": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "concept_sites"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "geometry": {
+                  "const": "MultiPolygon"
+                },
+                "features": {
+                  "items": {
+                    "properties": {
+                      "attrs": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "num": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
       }
     }
   },
   "$defs": {
     "feature": {
       "type": "object",
-      "required": ["object_id", "kind", "status", "source_label", "source_date"],
+      "required": [
+        "object_id",
+        "kind",
+        "status",
+        "source_label",
+        "source_date",
+        "fact_ids"
+      ],
+      "additionalProperties": false,
       "properties": {
         "object_id": {
           "type": "string",
           "pattern": "^[a-z_]+:[A-Za-z0-9._-]+$",
-          "description": "устойчивый идентификатор «слой:ключ»; не меняется между сборками. Пример: sites:3, parcels:05-40-000012-17"
+          "description": "устойчивый идентификатор «слой:ключ», ключ — из источника (README, «object_id»); уникален в файле"
         },
-        "name": { "type": "string", "description": "название как в документе; пусто для безымянных" },
-        "kind": { "type": "string", "description": "тип объекта словами по словарю слоя: квартал, участок концепции, школа, остановка, ЗОУИТ-СЗЗ" },
+        "name": {
+          "type": "string",
+          "description": "название как в источнике; пусто для безымянных"
+        },
+        "kind": {
+          "type": "string",
+          "description": "тип объекта словами по словарю слоя (kinds.yaml)"
+        },
         "status": {
           "type": "string",
-          "enum": ["official", "cadastral", "digitized", "concept", "reference"],
+          "enum": [
+            "official",
+            "cadastral",
+            "digitized",
+            "concept",
+            "reference"
+          ],
           "description": "статус геометрии; повышается только документом"
         },
-        "source_doc": { "type": "string", "description": "идентификатор документа в реестре базы, если источник — документ проекта" },
-        "source_label": { "type": "string", "description": "готовая подпись источника: документ и лист, номер выписки, имя внешнего источника с лицензией" },
-        "source_date": { "type": "string", "description": "дата документа или выгрузки, ISO" },
+        "source_doc": {
+          "type": "string",
+          "description": "идентификатор документа в реестре базы, если источник — документ проекта"
+        },
+        "source_label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "готовая подпись источника: документ и лист, номер выписки, имя внешнего источника"
+        },
+        "source_date": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}(-[0-9]{2})?$",
+          "description": "дата документа или выгрузки: ГГГГ-ММ-ДД или ГГГГ-ММ"
+        },
+        "source_license": {
+          "type": "string",
+          "description": "лицензия внешнего источника (ODbL 1.0, CDLA-Permissive-2.0 …); обязательна при status=reference"
+        },
         "fact_ids": {
           "type": "array",
-          "items": { "type": "string", "pattern": "^(F-[0-9]{6}|CALC-[0-9]{5}|NORM-[0-9]{5}|ASM-[0-9]{4})$" },
-          "description": "записи реестра, относящиеся к объекту: площадь по ТЭП, вместимость, норматив"
+          "items": {
+            "type": "string",
+            "pattern": "^(F-[0-9]{6}|CALC-[0-9]{5}|NORM-[0-9]{5}|ASM-[0-9]{4})$"
+          },
+          "description": "записи реестра базы, относящиеся к объекту; пустой список, если записей нет"
         },
         "attrs": {
           "type": "object",
-          "description": "свободные атрибуты слоя: номер квартала, кадастровый номер, вид разрешенного использования, вместимость; без проектных констант в именах полей"
+          "description": "атрибуты слоя: закрытый перечень по слою, см. allOf"
         },
-        "digitized_from": { "type": "string", "description": "обязательно при status=digitized: с какого документа или слайда, кем и когда" }
+        "digitized_from": {
+          "type": "string",
+          "description": "обязательно при status=digitized: с какого документа или слайда, кем и когда"
+        }
       },
       "allOf": [
-        { "if": { "properties": { "status": { "const": "digitized" } } }, "then": { "required": ["digitized_from"] } }
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "digitized"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "digitized_from"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "reference"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "source_license"
+            ]
+          }
+        }
       ]
     }
   }
