@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cm-contracts/overlay/1.0.0",
+  "title": "Слои карты поверх подложки (overlay.json): редактируемые элементы в координатах места макета",
+  "version": "1.0.0",
+  "description": "Все, что на карте кроме подложки. Координаты — миллиметры от левого верхнего угла места макета, ось y вниз. Верстка рисует это нативными фигурами и текстом PowerPoint; картограф пересчитывает из системы координат карты.",
+  "type": "object",
+  "required": ["basemap", "place", "map", "layers"],
+  "additionalProperties": false,
+  "properties": {
+    "basemap": { "type": "string", "description": "имя файла растра подложки рядом; его provenance.json — по контракту image" },
+    "place": {
+      "type": "object",
+      "required": ["name", "size_mm"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "description": "имя места макета из layout-matrix" },
+        "size_mm": { "type": "object", "required": ["width", "height"], "properties": { "width": { "type": "number" }, "height": { "type": "number" } }, "additionalProperties": false }
+      }
+    },
+    "map": {
+      "type": "object",
+      "required": ["crs", "extent", "scale"],
+      "additionalProperties": false,
+      "description": "привязка для обратного пересчета и проверки",
+      "properties": {
+        "crs": { "type": "string" },
+        "extent": { "type": "array", "items": { "type": "number" }, "minItems": 4, "maxItems": 4, "description": "xmin, ymin, xmax, ymax в crs" },
+        "scale": { "type": "integer", "description": "знаменатель масштаба при печати на size_mm" },
+        "rotation_deg": { "type": "number", "default": 0 }
+      }
+    },
+    "layers": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/layer" },
+      "description": "порядок в массиве — порядок отрисовки снизу вверх"
+    }
+  },
+  "$defs": {
+    "mm": { "type": "number" },
+    "point": { "type": "array", "items": { "$ref": "#/$defs/mm" }, "minItems": 2, "maxItems": 2 },
+    "ring": { "type": "array", "items": { "$ref": "#/$defs/point" }, "minItems": 3 },
+    "line": { "type": "array", "items": { "$ref": "#/$defs/point" }, "minItems": 2 },
+    "layer": {
+      "type": "object",
+      "required": ["id", "role", "kind", "source_label"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$", "description": "устойчивое имя слоя; становится именем группы фигур в PowerPoint" },
+        "role": { "type": "string", "description": "роль стиля из MAPS.md / map.yaml (territory, isochrone, zone_sanitary, poi_education, label_object, legend, scalebar и т. д.); цвета, толщины и знаки верстка берет по роли из токенов, в этом файле их нет" },
+        "kind": { "type": "string", "enum": ["polygon", "line", "point", "label", "legend", "scalebar", "north"] },
+        "source_label": { "type": "string", "description": "готовая подпись источника слоя для подвала" },
+        "status": { "type": "string", "enum": ["official", "cadastral", "digitized", "concept", "reference"] },
+        "fact_ids": { "type": "array", "items": { "type": "string", "pattern": "^(F-[0-9]{6}|CALC-[0-9]{5}|NORM-[0-9]{5}|ASM-[0-9]{4})$" } },
+        "simplify_mm": { "type": "number", "description": "допуск упрощения контуров, которым картограф уже воспользовался; по умолчанию 0,1" },
+        "features": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "description": "object_id из геопакета или служебный" },
+              "name": { "type": "string" },
+              "rings": { "type": "array", "items": { "$ref": "#/$defs/ring" }, "description": "polygon: первое кольцо внешнее, остальные дырки" },
+              "path": { "$ref": "#/$defs/line", "description": "line" },
+              "at": { "$ref": "#/$defs/point", "description": "point, label, north: точка привязки" },
+              "symbol": { "type": "string", "enum": ["circle", "square", "triangle", "ring", "cross"], "description": "point: форма знака; размер — по роли из токенов" },
+              "text": { "type": "string", "description": "label: текст подписи" },
+              "anchor": { "type": "string", "enum": ["nw", "n", "ne", "w", "c", "e", "sw", "s", "se"], "description": "label: какая точка текстового поля стоит в at" },
+              "leader_to": { "$ref": "#/$defs/point", "description": "label: конец выноски, если подпись отнесена от объекта" },
+              "size_role": { "type": "string", "description": "label: роль кегля из map.yaml (street, object, zone_index, legend); по умолчанию object" }
+            }
+          }
+        },
+        "legend": {
+          "type": "array",
+          "description": "kind=legend: строки легенды сверху вниз; верстка рисует образец по роли и текст",
+          "items": {
+            "type": "object",
+            "required": ["role", "text"],
+            "additionalProperties": false,
+            "properties": {
+              "role": { "type": "string" },
+              "kind": { "type": "string", "enum": ["polygon", "line", "point"] },
+              "symbol": { "type": "string" },
+              "text": { "type": "string" }
+            }
+          }
+        },
+        "legend_at": { "$ref": "#/$defs/point", "description": "kind=legend: левый верхний угол легенды; вне места — отрицательные или большие значения недопустимы, легенда снаружи ставится версткой в свое место" },
+        "scalebar": {
+          "type": "object",
+          "description": "kind=scalebar",
+          "required": ["at", "segments_m", "segment_mm"],
+          "additionalProperties": false,
+          "properties": {
+            "at": { "$ref": "#/$defs/point" },
+            "segments_m": { "type": "array", "items": { "type": "number" }, "description": "подписи делений в метрах, например [0, 100, 200]" },
+            "segment_mm": { "type": "number", "description": "длина одного деления на листе" }
+          }
+        }
+      },
+      "allOf": [
+        { "if": { "properties": { "kind": { "enum": ["polygon", "line", "point", "label"] } } }, "then": { "required": ["features"] } },
+        { "if": { "properties": { "kind": { "const": "legend" } } }, "then": { "required": ["legend"] } },
+        { "if": { "properties": { "kind": { "const": "scalebar" } } }, "then": { "required": ["scalebar"] } }
+      ]
+    }
+  }
+}
