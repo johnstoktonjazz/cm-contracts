@@ -16,7 +16,9 @@
           "source_doc": "DOC-0007",
           "source_label": "ППТ 2021, чертеж красных линий, лист 2",
           "source_date": "2021-06-01",
-          "fact_ids": ["F-000401"]
+          "fact_ids": [
+            "F-000401"
+          ]
         }
       ]
     },
@@ -32,8 +34,12 @@
           "source_doc": "DOC-0007",
           "source_label": "ППТ 2021, чертеж красных линий, лист 2",
           "source_date": "2021-06-01",
-          "fact_ids": ["F-000520"],
-          "attrs": { "num": "2" }
+          "fact_ids": [
+            "F-000520"
+          ],
+          "attrs": {
+            "num": "2"
+          }
         }
       ]
     },
@@ -48,7 +54,11 @@
           "source_label": "ЕГРН, КПТ от 01.10.2026",
           "source_date": "2026-10-01",
           "fact_ids": [],
-          "attrs": { "cadastral_number": "00:00:000001:12", "permitted_use": "образование и просвещение", "land_category": "земли населенных пунктов" }
+          "attrs": {
+            "cadastral_number": "00:00:000001:12",
+            "permitted_use": "образование и просвещение",
+            "land_category": "земли населенных пунктов"
+          }
         }
       ]
     },
@@ -63,8 +73,13 @@
           "status": "cadastral",
           "source_label": "ЕГРН, КПТ от 01.10.2026, реестровый номер 00:00-6.123",
           "source_date": "2026-10-01",
-          "fact_ids": ["NORM-00012"],
-          "attrs": { "zouit_type": "sanitary", "registry_number": "00:00-6.123" }
+          "fact_ids": [
+            "NORM-00012"
+          ],
+          "attrs": {
+            "zouit_type": "sanitary",
+            "registry_number": "00:00-6.123"
+          }
         }
       ]
     },
@@ -80,8 +95,12 @@
           "source_label": "оцифровано со слайда 12 альбома концепции, ред. 5",
           "source_date": "2026-10-09",
           "digitized_from": "альбом концепции ред. 5, слайд 12; оцифровка 09.10.2026, картограф",
-          "fact_ids": ["F-000412"],
-          "attrs": { "num": "3" }
+          "fact_ids": [
+            "F-000412"
+          ],
+          "attrs": {
+            "num": "3"
+          }
         }
       ]
     },
@@ -98,7 +117,10 @@
           "source_date": "2026-09-23",
           "source_license": "ODbL 1.0",
           "fact_ids": [],
-          "attrs": { "road_class": "main", "tunnel": false }
+          "attrs": {
+            "road_class": "main",
+            "tunnel": false
+          }
         }
       ]
     },
@@ -115,7 +137,14 @@
           "source_date": "2026-10-10",
           "source_license": "ODbL 1.0; открытые данные bus.gov.ru",
           "fact_ids": [],
-          "attrs": { "poi_type": "school", "capacity": 825, "confirmed_by": ["bus.gov.ru", "osm"] }
+          "attrs": {
+            "poi_type": "school",
+            "capacity": 825,
+            "confirmed_by": [
+              "bus.gov.ru",
+              "osm"
+            ]
+          }
         }
       ]
     },
@@ -126,12 +155,20 @@
         {
           "object_id": "isochrones:walk-15-transit_stops-osm-n700800900",
           "kind": "пешеходная доступность",
-          "status": "reference",
+          "status": "calc",
           "source_label": "расчет картографа по графу OpenStreetMap (Overture Maps 2026-09-23.0), 4,8 км/ч",
           "source_date": "2026-09-23",
           "source_license": "ODbL 1.0",
-          "fact_ids": ["CALC-00031", "ASM-0101"],
-          "attrs": { "mode": "walk", "minutes": 15, "speed_kmh": 4.8, "origin_id": "transit_stops:osm-n700800900" }
+          "fact_ids": [
+            "CALC-00031",
+            "ASM-0101"
+          ],
+          "attrs": {
+            "mode": "walk",
+            "minutes": 15,
+            "speed_kmh": 4.8,
+            "origin_id": "transit_stops:osm-n700800900"
+          }
         }
       ]
     }

@@ -1,62 +1,213 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "cm-contracts/image/1.0.0",
+  "$id": "cm-contracts/image/1.1.0",
   "title": "Сопроводительное описание картинки (*.provenance.json)",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "object",
-  "required": ["file", "kind", "source", "status", "size_mm"],
+  "required": [
+    "file",
+    "kind",
+    "source",
+    "status"
+  ],
   "additionalProperties": false,
   "properties": {
-    "file": { "type": "string", "description": "имя файла картинки рядом: PNG или SVG" },
+    "file": {
+      "type": "string",
+      "description": "имя файла картинки рядом: PNG или SVG"
+    },
     "kind": {
       "type": "string",
-      "enum": ["map", "scheme", "plan", "axonometry", "photo", "photomontage", "render", "chart"],
-      "description": "тип по принципу 11: карта, схема, план, аксонометрия, фото, фотомонтаж, рендер, диаграмма"
+      "enum": [
+        "map",
+        "scheme",
+        "plan",
+        "axonometry",
+        "photo",
+        "photomontage",
+        "render"
+      ],
+      "description": "тип по принципу 11: карта, схема, план, аксонометрия, фото, фотомонтаж, рендер; диаграммы верстка строит по данным"
     },
-    "title": { "type": "string", "description": "подпись к картинке, одна строка" },
-    "source": { "type": "string", "description": "готовая подпись источника геометрии или съемки для подвала" },
-    "date": { "type": "string", "description": "дата съемки или редакции данных, ISO или «нужен документ»" },
-    "point": { "type": "string", "description": "точка и направление съемки для видов; пусто для карт и схем" },
+    "title": {
+      "type": "string",
+      "description": "подпись к картинке, одна строка"
+    },
+    "source": {
+      "type": "string",
+      "description": "готовая подпись источника геометрии или съемки для подвала"
+    },
+    "date": {
+      "type": "string",
+      "description": "дата съемки или редакции данных, ISO или «нужен документ»",
+      "pattern": "^([0-9]{4}(-[0-9]{2}(-[0-9]{2})?)?|нужен документ)$"
+    },
+    "point": {
+      "type": "string",
+      "description": "номер точки съемки на карте альбома; для видов"
+    },
     "status": {
       "type": "string",
-      "enum": ["official", "cadastral", "digitized", "concept", "analog", "placeholder"],
-      "description": "откуда геометрия: утвержденный документ, кадастр, оцифровано с картинки, концепция, аналог, заглушка"
+      "enum": [
+        "official",
+        "cadastral",
+        "digitized",
+        "concept",
+        "reference",
+        "calc",
+        "analog",
+        "placeholder"
+      ],
+      "description": "откуда геометрия: утвержденный документ, кадастр, оцифровано с картинки, концепция, справочный внешний источник, расчет картографа (изохрона, буфер — с CALC/NORM/ASM в fact_ids), заготовка; аналог — полем analog, не статусом; analog в статусе устаревает (образцы верстки на нем) — переход на поле analog, убрать в 1.2.0"
     },
     "size_mm": {
       "type": "object",
-      "required": ["width", "height"],
-      "properties": { "width": { "type": "number" }, "height": { "type": "number" } },
+      "required": [
+        "width",
+        "height"
+      ],
+      "properties": {
+        "width": {
+          "type": "number"
+        },
+        "height": {
+          "type": "number"
+        }
+      },
       "additionalProperties": false,
-      "description": "размер, под который картинка собрана; равен месту макета — верстка не масштабирует карты и схемы (Д-006)"
+      "description": "размер места, под который собрана картинка (cm-design/tokens/image.yaml: places, map.yaml: places); обязателен у карт, схем, планов, аксонометрий — верстка их не масштабирует (Д-006); фото обрезается по месту"
     },
-    "dpi": { "type": "integer", "description": "для PNG; карты и схемы не ниже 300, фото не ниже 150" },
-    "crs": { "type": "string", "description": "для карт: система координат данных, например МСК-05 зона 2 или EPSG:32638" },
-    "scale": { "type": "string", "description": "для карт: знаменатель масштаба при печати на size_mm, например 1:5000" },
+    "dpi": {
+      "type": "integer",
+      "description": "для PNG; карты и схемы не ниже 300, фото не ниже 150"
+    },
+    "crs": {
+      "type": "string",
+      "description": "для карт: система координат данных, например МСК-05 зона 2 или EPSG:32638"
+    },
+    "scale": {
+      "type": "string",
+      "description": "для карт: знаменатель масштаба при печати на size_mm, например 1:5000",
+      "pattern": "^1:[0-9]+$"
+    },
     "layers": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["name", "source"],
+        "required": [
+          "name",
+          "source"
+        ],
         "properties": {
-          "name": { "type": "string" },
-          "source": { "type": "string" },
-          "status": { "type": "string", "enum": ["official", "cadastral", "digitized", "concept", "reference"] },
-          "date": { "type": "string" }
+          "name": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "official",
+              "cadastral",
+              "digitized",
+              "concept",
+              "reference",
+              "calc"
+            ]
+          },
+          "date": {
+            "type": "string",
+            "pattern": "^([0-9]{4}(-[0-9]{2}(-[0-9]{2})?)?|нужен документ)$"
+          },
+          "layer": {
+            "type": "string",
+            "description": "ключ слоя стандарта map.yaml: layers (роль); по строке легенды образец не построить"
+          }
         },
         "additionalProperties": false
       },
-      "description": "для карт: слои и источник каждого; verstka строит из них легенду и подпись источников"
+      "description": "для карт: слои подложки и источник каждого; верстка строит из них строку источников"
     },
-    "legend_file": { "type": "string", "description": "отдельная картинка легенды в натуральную величину (Д-040)" },
+    "legend_file": {
+      "type": "string",
+      "description": "отдельная картинка легенды в натуральную величину (Д-040) для картинок без overlay; у карт с overlay легенда — строками в overlay.json, поля нет"
+    },
     "fact_ids": {
       "type": "array",
-      "items": { "type": "string", "pattern": "^(F-[0-9]{6}|CALC-[0-9]{5}|NORM-[0-9]{5}|ASM-[0-9]{4})$" },
+      "items": {
+        "type": "string",
+        "pattern": "^(F-[0-9]{6}|CALC-[0-9]{5}|NORM-[0-9]{5}|ASM-[0-9]{4})$"
+      },
       "description": "записи реестра, которые картинка показывает или доказывает"
     },
-    "analog": { "type": "boolean", "description": "материал аналога, не проектное решение" }
+    "analog": {
+      "type": "boolean",
+      "description": "материал аналога, не проектное решение"
+    },
+    "direction": {
+      "type": "string",
+      "description": "направление съемки словами или азимутом; необязательно"
+    },
+    "overlay_file": {
+      "type": "string",
+      "description": "у подложки карты: имя файла overlay.json рядом (контракт overlay)"
+    }
   },
   "allOf": [
-    { "if": { "properties": { "kind": { "const": "map" } } }, "then": { "required": ["crs", "layers", "scale"] } },
-    { "if": { "properties": { "kind": { "enum": ["photo", "photomontage", "render"] } } }, "then": { "required": ["date", "point"] } }
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "map"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "crs",
+          "layers",
+          "scale"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "enum": [
+              "map",
+              "scheme",
+              "plan",
+              "axonometry"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "size_mm"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "enum": [
+              "photo",
+              "photomontage",
+              "render"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "date",
+          "point"
+        ]
+      }
+    }
   ]
 }

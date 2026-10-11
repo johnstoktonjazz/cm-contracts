@@ -1,18 +1,122 @@
 {
-  "basemap": "map_access.basemap.png",
-  "place": { "name": "map_analysis.map", "size_mm": { "width": 251.88, "height": 187.68 } },
-  "map": { "crs": "EPSG:32637", "extent": [399200.0, 5212400.0, 401719.0, 5214277.0], "scale": 10000, "rotation_deg": 0 },
+  "basemap": "map_north_part.png",
+  "place": {
+    "name": "landscape",
+    "size_mm": {
+      "width": 251.88,
+      "height": 187.68
+    }
+  },
+  "map": {
+    "crs": "EPSG:32637",
+    "extent": [
+      399200.0,
+      5212400.0,
+      401719.0,
+      5214277.0
+    ],
+    "scale": 10000,
+    "rotation_deg": 0
+  },
   "layers": [
     {
-      "id": "isochrone_walk_10",
-      "role": "isochrone",
+      "id": "zoning_zh",
+      "role": "zoning",
       "kind": "polygon",
-      "status": "reference",
-      "source_label": "изохрона 10 минут пешком по графу улиц OpenStreetMap, ODbL, 10.10.2026",
-      "fact_ids": ["CALC-00031"],
+      "status": "official",
+      "source_label": "ПЗЗ 2019, карта градостроительного зонирования",
+      "fact_ids": [],
       "simplify_mm": 0.1,
       "features": [
-        { "id": "isochrones:walk-10-q1", "rings": [[[61.2, 48.0], [88.4, 41.5], [112.9, 55.1], [120.3, 83.7], [104.6, 108.2], [74.1, 112.0], [52.8, 92.4], [50.5, 66.3], [61.2, 48.0]]] }
+        {
+          "id": "zones_pzz:zh-1",
+          "category": "Ж",
+          "rings": [
+            [
+              [
+                20.0,
+                20.0
+              ],
+              [
+                60.0,
+                20.0
+              ],
+              [
+                60.0,
+                50.0
+              ],
+              [
+                20.0,
+                50.0
+              ],
+              [
+                20.0,
+                20.0
+              ]
+            ]
+          ],
+          "fact_ids": [
+            "F-000530"
+          ],
+          "status": "official"
+        }
+      ]
+    },
+    {
+      "id": "reach_walk",
+      "role": "reach_walk",
+      "kind": "polygon",
+      "status": "calc",
+      "source_label": "10 минут пешком по графу улиц OpenStreetMap, ODbL 1.0, 23.09.2026; расчет CALC-00031, скорость ASM-0101",
+      "fact_ids": [
+        "CALC-00031",
+        "ASM-0101"
+      ],
+      "simplify_mm": 0.1,
+      "features": [
+        {
+          "id": "isochrones:walk-10-q1",
+          "rings": [
+            [
+              [
+                61.2,
+                48.0
+              ],
+              [
+                88.4,
+                41.5
+              ],
+              [
+                112.9,
+                55.1
+              ],
+              [
+                120.3,
+                83.7
+              ],
+              [
+                104.6,
+                108.2
+              ],
+              [
+                74.1,
+                112.0
+              ],
+              [
+                52.8,
+                92.4
+              ],
+              [
+                50.5,
+                66.3
+              ],
+              [
+                61.2,
+                48.0
+              ]
+            ]
+          ]
+        }
       ]
     },
     {
@@ -21,30 +125,106 @@
       "kind": "polygon",
       "status": "official",
       "source_label": "граница квартала — ППТ 2021, лист 2",
-      "fact_ids": ["F-000401"],
+      "fact_ids": [
+        "F-000401"
+      ],
       "features": [
-        { "id": "blocks:q1", "name": "квартал 1", "rings": [[[78.0, 70.0], [96.5, 70.0], [96.5, 86.0], [78.0, 86.0], [78.0, 70.0]]] }
+        {
+          "id": "blocks:q1",
+          "name": "квартал 1",
+          "rings": [
+            [
+              [
+                78.0,
+                70.0
+              ],
+              [
+                96.5,
+                70.0
+              ],
+              [
+                96.5,
+                86.0
+              ],
+              [
+                78.0,
+                86.0
+              ],
+              [
+                78.0,
+                70.0
+              ]
+            ]
+          ],
+          "fact_ids": [
+            "F-000401"
+          ]
+        }
       ]
     },
     {
-      "id": "schools",
-      "role": "poi_education",
+      "id": "point_1",
+      "role": "point_1",
       "kind": "point",
       "status": "reference",
       "source_label": "школы — bus.gov.ru и OpenStreetMap, 10.10.2026, совпадают",
       "features": [
-        { "id": "poi_education:school-4", "name": "школа № 4", "at": [101.3, 62.7], "symbol": "square" },
-        { "id": "poi_education:school-9", "name": "школа № 9", "at": [66.8, 95.2], "symbol": "square" }
+        {
+          "id": "poi_education:school-4",
+          "name": "школа № 4",
+          "at": [
+            101.3,
+            62.7
+          ],
+          "symbol": "circle"
+        },
+        {
+          "id": "poi_education:school-9",
+          "name": "школа № 9",
+          "at": [
+            66.8,
+            95.2
+          ],
+          "symbol": "circle"
+        }
       ]
     },
     {
-      "id": "labels_objects",
-      "role": "label_object",
+      "id": "labels",
+      "role": "label",
       "kind": "label",
       "source_label": "подписи объектов",
       "features": [
-        { "id": "label:school-4", "text": "Школа № 4", "at": [103.0, 61.0], "anchor": "sw", "size_role": "object" },
-        { "id": "label:q1", "text": "Квартал 1", "at": [87.2, 78.0], "anchor": "c", "size_role": "object" }
+        {
+          "id": "label:school-4",
+          "text": "Школа № 4",
+          "at": [
+            103.0,
+            61.0
+          ],
+          "anchor": "sw",
+          "size_role": "label"
+        },
+        {
+          "id": "label:q1",
+          "text": "Квартал 1",
+          "at": [
+            87.2,
+            78.0
+          ],
+          "anchor": "c",
+          "size_role": "label"
+        },
+        {
+          "id": "label:zh-1",
+          "text": "Ж-1",
+          "at": [
+            40.0,
+            35.0
+          ],
+          "anchor": "c",
+          "size_role": "label_minor"
+        }
       ]
     },
     {
@@ -53,17 +233,57 @@
       "kind": "legend",
       "source_label": "легенда",
       "legend": [
-        { "role": "territory", "kind": "polygon", "text": "Квартал 1" },
-        { "role": "isochrone", "kind": "polygon", "text": "10 минут пешком по улицам" },
-        { "role": "poi_education", "kind": "point", "symbol": "square", "text": "Школы" }
+        {
+          "role": "analysis",
+          "kind": "group",
+          "text": "Данные анализа"
+        },
+        {
+          "role": "point_1",
+          "kind": "point",
+          "symbol": "circle",
+          "text": "Школы"
+        },
+        {
+          "role": "reach_walk",
+          "kind": "polygon",
+          "text": "10 минут пешком по улицам"
+        },
+        {
+          "role": "boundaries",
+          "kind": "group",
+          "text": "Границы и зоны"
+        },
+        {
+          "role": "territory",
+          "kind": "polygon",
+          "text": "Квартал 1"
+        },
+        {
+          "role": "zoning",
+          "kind": "polygon",
+          "category": "Ж",
+          "text": "Жилая зона"
+        }
       ]
     },
     {
-      "id": "scalebar",
-      "role": "scalebar",
+      "id": "scale_bar",
+      "role": "scale_bar",
       "kind": "scalebar",
       "source_label": "масштабная линейка",
-      "scalebar": { "at": [206.0, 180.0], "segments_m": [0, 100, 200], "segment_mm": 10.0 }
+      "scalebar": {
+        "at": [
+          206.0,
+          180.0
+        ],
+        "segments_m": [
+          0,
+          100,
+          200
+        ],
+        "segment_mm": 10.0
+      }
     }
   ]
 }

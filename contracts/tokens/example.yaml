@@ -1,0 +1,24 @@
+# Контракт tokens 1.0.0: синтетический фрагмент в ключах schema.json — не копия токенов верстки (значения выдуманы).
+# Настоящие значения — cm-design/tokens/style.yaml и map.yaml; их проверяет тест верстки tests/test_contracts.py.
+# Цвета — в кавычках: без них YAML читает «202020» как число.
+style:
+  unit: {pt: 12, mm: 4.23}
+  colors: {text: "202020", accent: "C05030", rule: "C0C0C0", background: "FFFFFF", secondary: "707070", placeholder: "E8E8E8"}
+  font:
+    faces: {light: Example Sans Light, regular: Example Sans, medium: Example Sans Medium, semibold: Example Sans SemiBold}
+  sizes: [7, 9, 12, 20]
+  number_format: {thousands: " ", decimal: ","}
+map:
+  palette: {block: "EEEEEE", water: "A0B8C8", green: "C0D0B0"}
+  line_types: {solid: [], dash: [2.0, 1.0]}
+  min_line_width: 0.2
+  layers:
+    territory: {title: Граница территории, level: boundaries, geometry: polygon}
+    blocks: {title: Кварталы, level: basemap, geometry: polygon}
+  text:
+    styles:
+      label: {size: 9, weight: Regular, color: text}
+      legend: {size: 12, weight: Regular, color: text}
+  places:
+    half: {grid: [6, 30], image: [180.0, 150.0]}
+  export: {format: PNG, dpi: 300}

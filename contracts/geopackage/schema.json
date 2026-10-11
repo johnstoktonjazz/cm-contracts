@@ -1149,9 +1149,10 @@
             "cadastral",
             "digitized",
             "concept",
-            "reference"
+            "reference",
+            "calc"
           ],
-          "description": "статус геометрии; повышается только документом"
+          "description": "статус геометрии; повышается только документом; calc — расчет картографа (изохрона, буфер) с CALC/NORM/ASM в fact_ids"
         },
         "source_doc": {
           "type": "string",
@@ -1208,6 +1209,20 @@
             "properties": {
               "status": {
                 "const": "reference"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "source_license"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "calc"
               }
             }
           },
