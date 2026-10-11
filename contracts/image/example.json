@@ -1,21 +1,42 @@
 {
   "file": "map_north_part.png",
   "kind": "map",
-  "title": "Северная часть территории поверх кварталов проекта планировки",
-  "source": "ППТ 2021, чертеж красных линий; кадастр — выписки ЕГРН, октябрь 2026",
-  "date": "2026-10-11",
-  "status": "official",
-  "size_mm": { "width": 252.0, "height": 188.0 },
+  "title": "Северная часть территории: подложка",
+  "source": "OpenStreetMap через Overture Maps 2026-09-23.0, ODbL 1.0",
+  "date": "2026-09-23",
+  "status": "reference",
+  "size_mm": {
+    "width": 251.88,
+    "height": 187.68
+  },
   "dpi": 300,
-  "crs": "МСК-05 зона 2",
+  "crs": "EPSG:32638",
   "scale": "1:5000",
   "layers": [
-    { "name": "граница проекта планировки", "source": "ППТ 2021, лист 2", "status": "official", "date": "2021-06-01" },
-    { "name": "кварталы", "source": "ППТ 2021, лист 2", "status": "official", "date": "2021-06-01" },
-    { "name": "участки", "source": "ЕГРН, КПТ", "status": "cadastral", "date": "2026-10-01" },
-    { "name": "северная часть", "source": "допущение ASM-0003", "status": "digitized", "date": "2026-10-09" },
-    { "name": "подложка", "source": "OpenStreetMap, ODbL", "status": "reference", "date": "2026-10-10" }
+    {
+      "name": "кварталы",
+      "layer": "blocks",
+      "source": "OpenStreetMap через Overture Maps, ODbL 1.0",
+      "status": "reference",
+      "date": "2026-09-23"
+    },
+    {
+      "name": "улицы",
+      "layer": "road_main",
+      "source": "OpenStreetMap через Overture Maps, ODbL 1.0",
+      "status": "reference",
+      "date": "2026-09-23"
+    },
+    {
+      "name": "вода",
+      "layer": "water",
+      "source": "OpenStreetMap через Overture Maps, ODbL 1.0",
+      "status": "reference",
+      "date": "2026-09-23"
+    }
   ],
-  "legend_file": "map_north_part.legend.png",
-  "fact_ids": ["F-000412", "ASM-0003"]
+  "overlay_file": "map_north_part.overlay.json",
+  "fact_ids": [
+    "ASM-0003"
+  ]
 }
