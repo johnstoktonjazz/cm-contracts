@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "cm-contracts/slide/1.0.0",
-  "version": "1.0.0",
+  "$id": "cm-contracts/slide/1.1.0",
+  "version": "1.1.0",
   "title": "Описание слайда CM",
-  "description": "Один файл YAML на слайд. Все содержимое — в местах макета по именам из tokens/layout-matrix.yaml. У каждого показателя ровно один идентификатор факта, расчета или допущения; у числа в ячейке таблицы — на ячейке или на строке.",
+  "description": "Один файл YAML на слайд. Все содержимое — в местах макета по именам из tokens/layout-matrix.yaml. У каждого показателя ровно один идентификатор факта, расчета, нормы или допущения; у числа в ячейке таблицы — на ячейке или на строке.",
   "type": "object",
   "properties": {
     "id": {
@@ -17,7 +17,7 @@
       "pattern": "^[a-z][a-z0-9_]*$"
     },
     "analog": {
-      "description": "Лист аналога (tokens/text.yaml: analog; Д-042, ответ 6): true — движок дописывает в конец подзаголовка (место subtitle) «Аналог, не проектное решение» через «. », без подзаголовка фраза и есть подзаголовок; false — пометки нет. Только у макета с местом subtitle; по умолчанию true у object_card, у остальных false. Автор фразу не пишет нигде на листе.",
+      "description": "Лист аналога (tokens/text.yaml: analog; Д-042, ответ 6): true — движок дописывает в конец подзаголовка (место subtitle, второй абзац заголовка) «Аналог, не проектное решение» через «. », без подзаголовка фраза и есть подзаголовок; false — пометки нет. Только у макета с местом subtitle; по умолчанию true у object_card, у остальных false. Автор фразу не пишет нигде на листе.",
       "type": "boolean"
     },
     "colophon": {
@@ -25,7 +25,7 @@
       "const": "auto"
     },
     "numbers_unit": {
-      "description": "Общая единица крупных чисел листа (tokens/number.yaml: common_unit): число в этой единице пишется без нее, единица — один раз в конце подзаголовка через запятую («Вместимость мечети, чел.»); нужен subtitle. Число с другой единицей пишет ее у значения.",
+      "description": "Общая единица крупных чисел листа (tokens/number.yaml: common_unit): число в этой единице пишется без нее, единица — один раз в конце подзаголовка (второго абзаца заголовка) через запятую («Вместимость мечети, чел.»); нужен subtitle. Число с другой единицей пишет ее у значения.",
       "type": "string",
       "minLength": 1
     },
@@ -50,7 +50,7 @@
   "additionalProperties": false,
   "$defs": {
     "place": {
-      "description": "Вид содержимого — по форме: строка или объект с text — текст, список — легенда, объект с columns — таблица, с file или diagram — картинка, с series или message — диаграмма, иначе — крупное число.",
+      "description": "Вид содержимого — по форме: строка или объект с text — текст, список — легенда, объект с columns — таблица, с file, diagram или overlay — картинка, с series или message — диаграмма, иначе — крупное число.",
       "if": {"type": "string"},
       "then": {"$ref": "#/$defs/text"},
       "else": {
@@ -60,7 +60,7 @@
           "if": {"required": ["columns"]},
           "then": {"$ref": "#/$defs/table"},
           "else": {
-            "if": {"anyOf": [{"required": ["file"]}, {"required": ["diagram"]}]},
+            "if": {"anyOf": [{"required": ["file"]}, {"required": ["diagram"]}, {"required": ["overlay"]}]},
             "then": {"$ref": "#/$defs/image"},
             "else": {
               "if": {"anyOf": [{"required": ["series"]}, {"required": ["message"]}]},
@@ -98,6 +98,7 @@
         "unit": {"type": "string"},
         "fact_id": {"$ref": "#/$defs/fact_id"},
         "calc_id": {"$ref": "#/$defs/calc_id"},
+        "norm_id": {"$ref": "#/$defs/norm_id"},
         "assumption_id": {"$ref": "#/$defs/assumption_id"},
         "status": {"const": "check"},
         "source_label": {"type": "string", "minLength": 1}
@@ -107,6 +108,7 @@
       "oneOf": [
         {"required": ["fact_id"]},
         {"required": ["calc_id"]},
+        {"required": ["norm_id"]},
         {"required": ["assumption_id"]}
       ]
     },
@@ -118,6 +120,7 @@
         "unit": {"type": "string"},
         "fact_id": {"$ref": "#/$defs/fact_id"},
         "calc_id": {"$ref": "#/$defs/calc_id"},
+        "norm_id": {"$ref": "#/$defs/norm_id"},
         "assumption_id": {"$ref": "#/$defs/assumption_id"},
         "status": {"const": "check"},
         "source_label": {"type": "string", "minLength": 1},
@@ -128,15 +131,17 @@
       "oneOf": [
         {"required": ["fact_id"]},
         {"required": ["calc_id"]},
+        {"required": ["norm_id"]},
         {"required": ["assumption_id"]}
       ]
     },
     "fact_id": {"type": "string", "pattern": "^(F-[0-9]{6}|FACT-TBD-[0-9]{3})$"},
     "calc_id": {"type": "string", "pattern": "^CALC-[0-9]{5}$"},
+    "norm_id": {"type": "string", "pattern": "^NORM-[0-9]{5}$"},
     "assumption_id": {"type": "string", "pattern": "^ASM-[0-9]{4}$"},
     "any_id": {
-      "description": "Идентификатор факта, расчета или допущения.",
-      "anyOf": [{"$ref": "#/$defs/fact_id"}, {"$ref": "#/$defs/calc_id"}, {"$ref": "#/$defs/assumption_id"}]
+      "description": "Идентификатор факта, расчета, нормы или допущения.",
+      "anyOf": [{"$ref": "#/$defs/fact_id"}, {"$ref": "#/$defs/calc_id"}, {"$ref": "#/$defs/norm_id"}, {"$ref": "#/$defs/assumption_id"}]
     },
     "column": {
       "description": "Колонка таблицы. unit — единица колонки: стоит в шапке, в ячейках не повторяется.",
@@ -169,6 +174,7 @@
         "text": {"type": "string", "minLength": 1},
         "fact_id": {"$ref": "#/$defs/fact_id"},
         "calc_id": {"$ref": "#/$defs/calc_id"},
+        "norm_id": {"$ref": "#/$defs/norm_id"},
         "assumption_id": {"$ref": "#/$defs/assumption_id"},
         "status": {"const": "check"}
       },
@@ -177,6 +183,7 @@
       "oneOf": [
         {"required": ["fact_id"]},
         {"required": ["calc_id"]},
+        {"required": ["norm_id"]},
         {"required": ["assumption_id"]}
       ]
     },
@@ -191,6 +198,7 @@
           "cells": {"$ref": "#/$defs/cells"},
           "fact_id": {"$ref": "#/$defs/fact_id"},
           "calc_id": {"$ref": "#/$defs/calc_id"},
+          "norm_id": {"$ref": "#/$defs/norm_id"},
           "assumption_id": {"$ref": "#/$defs/assumption_id"},
           "status": {"const": "check"}
         },
@@ -199,6 +207,7 @@
         "oneOf": [
           {"required": ["fact_id"]},
           {"required": ["calc_id"]},
+          {"required": ["norm_id"]},
           {"required": ["assumption_id"]}
         ]
       }
@@ -213,12 +222,17 @@
       "additionalProperties": false
     },
     "image": {
-      "description": "Картинка: файл относительно папки описания (file) или описание схемы (diagram), вид, источник; для видов — дата и точка съемки.",
+      "description": "Картинка: файл относительно папки описания (file) или описание схемы (diagram), вид, источник; для видов — дата и точка съемки. Карта с данными поверх подложки — file и overlay.",
       "type": "object",
       "properties": {
         "file": {"type": "string", "minLength": 1},
         "diagram": {
-          "description": "Описание схемы (YAML по cm_deck/diagrams/schema.json, DIAGRAMS.md) относительно папки описания слайда: SVG рисует движок при сборке в размер места; только kind: схема, вместо file.",
+          "description": "Описание схемы (YAML по cm_deck/diagrams/schema.json, DIAGRAMS.md) относительно папки описания слайда: схему рисует движок при сборке нативными фигурами PowerPoint в размер места (текст остается текстом); только kind: схема, вместо file.",
+          "type": "string",
+          "minLength": 1
+        },
+        "overlay": {
+          "description": "Данные карты поверх подложки: JSON наложения (<имя>.overlay.json, контракт overlay) относительно папки описания слайда. Движок рисует их группой нативных фигур в месте картинки и формат JSON не разбирает; идентификаторы fact_ids из JSON входят в идентификаторы слайда. Только kind: карта, вместе с file (подложка — картинка по контракту image).",
           "type": "string",
           "minLength": 1
         },
@@ -236,8 +250,10 @@
       "required": ["kind", "source"],
       "additionalProperties": false,
       "oneOf": [{"required": ["file"]}, {"required": ["diagram"]}],
-      "if": {"required": ["diagram"]},
-      "then": {"properties": {"kind": {"const": "схема"}}}
+      "allOf": [
+        {"if": {"required": ["diagram"]}, "then": {"properties": {"kind": {"const": "схема"}}}},
+        {"if": {"required": ["overlay"]}, "then": {"properties": {"kind": {"const": "карта"}}, "required": ["file"]}}
+      ]
     },
     "chart": {
       "description": "Диаграмма по tokens/chart.yaml: сообщение, тип, что измерено, единица, категории и ряды показателей.",
