@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cm-contracts/tokens/1.0.0",
+  "title": "Токены стиля, которые читает картограф: подмножество cm-design/tokens/style.yaml и map.yaml",
+  "version": "1.0.0",
+  "description": "Экземпляр — пара файлов верстки {style: <tokens/style.yaml>, map: <tokens/map.yaml>}, прочитанных как YAML и приведенных к модели JSON (ключи — строки). Схема держит только ключи, которые картограф читает; остальные ключи файлов — дело верстки, картограф их не читает (правило 5). Длины — мм на листе А3, кегли — pt.",
+  "type": "object",
+  "required": ["style", "map"],
+  "additionalProperties": false,
+  "properties": {
+    "style": { "$ref": "#/$defs/style" },
+    "map": { "$ref": "#/$defs/map" }
+  },
+  "$defs": {
+    "hex": { "type": "string", "pattern": "^[0-9A-F]{6}$", "description": "цвет RGB: шесть шестнадцатеричных знаков заглавными, без решетки" },
+    "name": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$", "description": "имя цвета: роль style.yaml: colors или ключ map.yaml: palette" },
+    "mm": { "type": "number", "exclusiveMinimum": 0 },
+    "style": {
+      "type": "object",
+      "required": ["unit", "colors", "font", "sizes", "number_format"],
+      "properties": {
+        "unit": {
+          "type": "object",
+          "required": ["pt", "mm"],
+          "properties": { "pt": { "type": "integer", "minimum": 1 }, "mm": { "$ref": "#/$defs/mm" } },
+          "description": "единица сетки: межстрочный основного текста; поля и отступы листа — в единицах (margins.left_u, top_u)"
+        },
+        "colors": {
+          "type": "object",
+          "required": ["text", "accent", "rule", "background", "secondary", "placeholder"],
+          "propertyNames": { "pattern": "^[a-z][a-z0-9_]*$" },
+          "additionalProperties": { "$ref": "#/$defs/hex" },
+          "description": "роли цвета слайда: text — текст и данные, accent — акцент (граница территории, check), rule — линия таблицы, background — фон и плашки, secondary — подписи и подвал, placeholder — заливка заглушки"
+        },
+        "font": {
+          "type": "object",
+          "required": ["faces"],
+          "properties": {
+            "faces": {
+              "type": "object",
+              "required": ["light", "regular", "medium", "semibold"],
+              "additionalProperties": { "type": "string", "minLength": 1 },
+              "description": "начертание → имя семейства шрифта, как его вызывают PowerPoint и QGIS"
+            },
+            "files": {
+              "type": "object",
+              "additionalProperties": { "type": "string", "minLength": 1 },
+              "description": "начертание → файл TTF от корня cm-design"
+            }
+          }
+        },
+        "sizes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "integer", "minimum": 1 },
+          "description": "шкала кеглей, pt; других кеглей нет. Назначение кеглей на слайде — text.yaml: roles, на карте — map.yaml: text.styles"
+        },
+        "number_format": {
+          "type": "object",
+          "required": ["thousands", "decimal"],
+          "properties": { "thousands": { "type": "string" }, "decimal": { "type": "string" } },
+          "description": "разделитель разрядов и десятичный знак: цифры масштабной линейки и подписей карты"
+        }
+      }
+    },
+    "map": {
+      "type": "object",
+      "required": ["palette", "line_types", "min_line_width", "layers", "text", "places", "export"],
+      "properties": {
+        "palette": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": { "pattern": "^[a-z][a-z0-9_]*$" },
+          "additionalProperties": { "$ref": "#/$defs/hex" },
+          "description": "палитра карт сверх ролей style.yaml: colors: подложка, вода, зелень, застройка, улицы, зоны"
+        },
+        "line_types": {
+          "type": "object",
+          "required": ["solid"],
+          "additionalProperties": { "type": "array", "items": { "$ref": "#/$defs/mm" } },
+          "description": "тип линии → длины штриха и пробела по очереди, мм; пустой список — сплошная"
+        },
+        "min_line_width": { "$ref": "#/$defs/mm", "description": "самая тонкая линия на карте, мм" },
+        "layers": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": { "pattern": "^[a-z][a-z0-9_]*$" },
+          "additionalProperties": {
+            "type": "object",
+            "required": ["title", "level", "geometry"],
+            "properties": {
+              "title": { "type": "string", "minLength": 1 },
+              "level": { "type": "string" },
+              "geometry": { "enum": ["point", "line", "polygon"] }
+            }
+          },
+          "description": "слои стандарта: ключ слоя — имя стиля design/qgis/<ключ>.qml, который генерирует верстка (cm_deck/qgis.py); title — строка легенды по умолчанию. Толщины и цвета слоя — внутри стиля, картограф их не читает"
+        },
+        "text": {
+          "type": "object",
+          "required": ["styles"],
+          "properties": {
+            "styles": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "required": ["size", "weight", "color"],
+                "properties": {
+                  "size": { "type": "integer", "minimum": 1 },
+                  "weight": { "enum": ["Light", "Regular", "Medium", "SemiBold"] },
+                  "color": { "$ref": "#/$defs/name" }
+                }
+              },
+              "description": "стиль подписи на карте → кегль из шкалы style.yaml: sizes, начертание, цвет"
+            }
+          }
+        },
+        "places": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "required": ["image"],
+            "properties": {
+              "image": { "type": "array", "prefixItems": [{ "$ref": "#/$defs/mm" }, { "$ref": "#/$defs/mm" }], "minItems": 2, "maxItems": 2 }
+            }
+          },
+          "description": "блок места → ширина и высота карты, мм (те же блоки и размеры, что image.yaml: places, ключ size); карта рендерится в этот размер, size_mm контракта image — отсюда"
+        },
+        "export": {
+          "type": "object",
+          "required": ["dpi"],
+          "properties": { "format": { "type": "string" }, "dpi": { "type": "integer", "minimum": 300 } },
+          "description": "экспорт карты: формат и разрешение, не ниже 300 dpi"
+        }
+      }
+    }
+  }
+}

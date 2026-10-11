@@ -1,0 +1,38 @@
+# Контракт slide 1.0.0: одно описание слайда по schema.json. Синтетический мини-проект «Приречный», как в
+# contracts/fact/example.yaml: идентификаторы F-000412, CALC-00021, ASM-0003 и подписи источников (source_label) — оттуда.
+# Макет tep_table (cm-design/tokens/layout-matrix.yaml): таблица показателей, число в тексте с идентификатором и схема-ключ.
+# Крупного числа (место number) у макетов с таблицей и картинкой нет: число здесь — показатель таблицы и число во фразе.
+# Картинка — заглушка: images/prirechny-key.png рисует cm-deck placeholder --kind схема --place landscape, рядом лежит
+# images/prirechny-key.provenance.json по контракту image со status: placeholder; source и date — как в provenance.
+# Проверка у верстки: cm-design/tests/test_contracts.py (проходит схему, собирается движком, проходит линтер).
+id: PR-01
+layout: tep_table
+places:
+  title:
+    text: Кварталу 2 нужна школа на 374 места
+    fact_ids: [CALC-00021]
+  subtitle: Потребность по нормативу области и участок под школу в северной части территории
+  table_1:
+    columns: [{title: Квартал}, {title: Потребность в школах, unit: мест, numeric: true}]
+    rows:
+      - - Квартал 2
+        - {value: "374", unit: мест, calc_id: CALC-00021, source_label: "расчет по РНГП области, табл. 12; население — ППТ, том 1, с. 30"}
+  table_2:
+    columns: [{title: Участок}, {title: Часть территории}, {unit: га, numeric: true}]
+    rows:
+      - - Участок 3
+        - {text: Северная, assumption_id: ASM-0003}
+        - {value: "4,27", unit: га, fact_id: F-000412, source_label: "ППТ, том 1, табл. 3, строка 3, с. 22"}
+  note:
+    text: Участок 3 площадью 4,27 га лежит севернее оси улицы Садовой, в границах проекта планировки.
+    fact_ids: [F-000412, ASM-0003]
+  image_1:
+    file: images/prirechny-key.png
+    kind: схема
+    source: заглушка
+    date: нужен документ
+    caption: Квартал 2 и участок 3; номер строки таблицы — номер на схеме
+sources: []
+notes: >
+  Пример контракта slide: показатель с calc_id и fact_id, текстовая ячейка с assumption_id, числа во фразе с fact_ids,
+  подписи источников — source_label показателей (движок выводит их в подвал, Д-040), картинка-заглушка с provenance.

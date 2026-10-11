@@ -1,0 +1,309 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cm-contracts/slide/1.0.0",
+  "version": "1.0.0",
+  "title": "Описание слайда CM",
+  "description": "Один файл YAML на слайд. Все содержимое — в местах макета по именам из tokens/layout-matrix.yaml. У каждого показателя ровно один идентификатор факта, расчета или допущения; у числа в ячейке таблицы — на ячейке или на строке.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "Стабильный идентификатор слайда; в pptx — имя слайда.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "layout": {
+      "description": "Имя макета из tokens/layout-matrix.yaml.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "analog": {
+      "description": "Лист аналога (tokens/text.yaml: analog; Д-042, ответ 6): true — движок дописывает в конец подзаголовка (место subtitle) «Аналог, не проектное решение» через «. », без подзаголовка фраза и есть подзаголовок; false — пометки нет. Только у макета с местом subtitle; по умолчанию true у object_card, у остальных false. Автор фразу не пишет нигде на листе.",
+      "type": "boolean"
+    },
+    "colophon": {
+      "description": "Только у макета colophon: auto — таблицу картинок пишет движок из описаний всей колоды (tokens/image.yaml: colophon): слайд, картинка, тип, источник, дата и точка; строк больше бюджета места — несколько листов с повтором шапки, второй лист — «<id>-2». Автор пишет title, subtitle, imprint; таблица вместе с auto — ошибка. Колофон с auto — последнее описание папки.",
+      "const": "auto"
+    },
+    "numbers_unit": {
+      "description": "Общая единица крупных чисел листа (tokens/number.yaml: common_unit): число в этой единице пишется без нее, единица — один раз в конце подзаголовка через запятую («Вместимость мечети, чел.»); нужен subtitle. Число с другой единицей пишет ее у значения.",
+      "type": "string",
+      "minLength": 1
+    },
+    "places": {
+      "description": "Содержимое мест: ключ — имя места, значение — текст, таблица, картинка, число, диаграмма или легенда.",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"pattern": "^[a-z][a-z0-9_]*$"},
+      "additionalProperties": {"$ref": "#/$defs/place"}
+    },
+    "sources": {
+      "description": "Источники слайда; движок пишет их в подвал через «; ».",
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "notes": {
+      "description": "Текст для автора и проверяющего: пометки, расхождения источников; движок пишет его в заметки докладчика слайда как есть, одним абзацем.",
+      "type": "string"
+    }
+  },
+  "required": ["id", "layout", "places", "sources"],
+  "additionalProperties": false,
+  "$defs": {
+    "place": {
+      "description": "Вид содержимого — по форме: строка или объект с text — текст, список — легенда, объект с columns — таблица, с file или diagram — картинка, с series или message — диаграмма, иначе — крупное число.",
+      "if": {"type": "string"},
+      "then": {"$ref": "#/$defs/text"},
+      "else": {
+        "if": {"type": "array"},
+        "then": {"$ref": "#/$defs/legend"},
+        "else": {
+          "if": {"required": ["columns"]},
+          "then": {"$ref": "#/$defs/table"},
+          "else": {
+            "if": {"anyOf": [{"required": ["file"]}, {"required": ["diagram"]}]},
+            "then": {"$ref": "#/$defs/image"},
+            "else": {
+              "if": {"anyOf": [{"required": ["series"]}, {"required": ["message"]}]},
+              "then": {"$ref": "#/$defs/chart"},
+              "else": {
+                "if": {"required": ["text"]},
+                "then": {"$ref": "#/$defs/text_ids"},
+                "else": {"$ref": "#/$defs/number"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "text": {
+      "description": "Текст места. Перевод строки — новый абзац.",
+      "type": "string",
+      "minLength": 1
+    },
+    "text_ids": {
+      "description": "Текст с числами внутри фразы: текст пишется как есть, идентификаторы чисел (факта, расчета или допущения) не печатаются.",
+      "type": "object",
+      "properties": {
+        "text": {"type": "string", "minLength": 1},
+        "fact_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/any_id"}}
+      },
+      "required": ["text", "fact_ids"],
+      "additionalProperties": false
+    },
+    "indicator": {
+      "description": "Показатель: значение строкой как в источнике, единица и ровно один идентификатор.",
+      "type": "object",
+      "properties": {
+        "value": {"type": "string"},
+        "unit": {"type": "string"},
+        "fact_id": {"$ref": "#/$defs/fact_id"},
+        "calc_id": {"$ref": "#/$defs/calc_id"},
+        "assumption_id": {"$ref": "#/$defs/assumption_id"},
+        "status": {"const": "check"},
+        "source_label": {"type": "string", "minLength": 1}
+      },
+      "required": ["value", "unit"],
+      "additionalProperties": false,
+      "oneOf": [
+        {"required": ["fact_id"]},
+        {"required": ["calc_id"]},
+        {"required": ["assumption_id"]}
+      ]
+    },
+    "number": {
+      "description": "Крупное число: показатель с подписью.",
+      "type": "object",
+      "properties": {
+        "value": {"type": "string", "minLength": 1},
+        "unit": {"type": "string"},
+        "fact_id": {"$ref": "#/$defs/fact_id"},
+        "calc_id": {"$ref": "#/$defs/calc_id"},
+        "assumption_id": {"$ref": "#/$defs/assumption_id"},
+        "status": {"const": "check"},
+        "source_label": {"type": "string", "minLength": 1},
+        "label": {"type": "string", "minLength": 1}
+      },
+      "required": ["value", "unit", "label"],
+      "additionalProperties": false,
+      "oneOf": [
+        {"required": ["fact_id"]},
+        {"required": ["calc_id"]},
+        {"required": ["assumption_id"]}
+      ]
+    },
+    "fact_id": {"type": "string", "pattern": "^(F-[0-9]{6}|FACT-TBD-[0-9]{3})$"},
+    "calc_id": {"type": "string", "pattern": "^CALC-[0-9]{5}$"},
+    "assumption_id": {"type": "string", "pattern": "^ASM-[0-9]{4}$"},
+    "any_id": {
+      "description": "Идентификатор факта, расчета или допущения.",
+      "anyOf": [{"$ref": "#/$defs/fact_id"}, {"$ref": "#/$defs/calc_id"}, {"$ref": "#/$defs/assumption_id"}]
+    },
+    "column": {
+      "description": "Колонка таблицы. unit — единица колонки: стоит в шапке, в ячейках не повторяется.",
+      "type": "object",
+      "properties": {
+        "title": {"type": "string", "minLength": 1},
+        "unit": {"type": "string", "minLength": 1},
+        "numeric": {"type": "boolean"}
+      },
+      "anyOf": [
+        {"required": ["title"]},
+        {"required": ["unit"]}
+      ],
+      "additionalProperties": false
+    },
+    "cell": {
+      "description": "Ячейка: строка, показатель или текст с идентификатором.",
+      "if": {"type": "string"},
+      "then": {"type": "string", "minLength": 1},
+      "else": {
+        "if": {"required": ["text"]},
+        "then": {"$ref": "#/$defs/text_cell"},
+        "else": {"$ref": "#/$defs/indicator"}
+      }
+    },
+    "text_cell": {
+      "description": "Текст ячейки с идентификатором: текст пишется как есть, идентификатор не печатается; status: check — текст цветом пометки check.",
+      "type": "object",
+      "properties": {
+        "text": {"type": "string", "minLength": 1},
+        "fact_id": {"$ref": "#/$defs/fact_id"},
+        "calc_id": {"$ref": "#/$defs/calc_id"},
+        "assumption_id": {"$ref": "#/$defs/assumption_id"},
+        "status": {"const": "check"}
+      },
+      "required": ["text"],
+      "additionalProperties": false,
+      "oneOf": [
+        {"required": ["fact_id"]},
+        {"required": ["calc_id"]},
+        {"required": ["assumption_id"]}
+      ]
+    },
+    "cells": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/cell"}},
+    "row": {
+      "description": "Строка таблицы: список ячеек или {cells, fact_id | calc_id | assumption_id, status} — идентификатор строки относится ко всем ее ячейкам и не печатается; status: check — все ячейки строки цветом пометки check.",
+      "if": {"type": "array"},
+      "then": {"$ref": "#/$defs/cells"},
+      "else": {
+        "type": "object",
+        "properties": {
+          "cells": {"$ref": "#/$defs/cells"},
+          "fact_id": {"$ref": "#/$defs/fact_id"},
+          "calc_id": {"$ref": "#/$defs/calc_id"},
+          "assumption_id": {"$ref": "#/$defs/assumption_id"},
+          "status": {"const": "check"}
+        },
+        "required": ["cells"],
+        "additionalProperties": false,
+        "oneOf": [
+          {"required": ["fact_id"]},
+          {"required": ["calc_id"]},
+          {"required": ["assumption_id"]}
+        ]
+      }
+    },
+    "table": {
+      "type": "object",
+      "properties": {
+        "columns": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/column"}},
+        "rows": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/row"}}
+      },
+      "required": ["columns", "rows"],
+      "additionalProperties": false
+    },
+    "image": {
+      "description": "Картинка: файл относительно папки описания (file) или описание схемы (diagram), вид, источник; для видов — дата и точка съемки.",
+      "type": "object",
+      "properties": {
+        "file": {"type": "string", "minLength": 1},
+        "diagram": {
+          "description": "Описание схемы (YAML по cm_deck/diagrams/schema.json, DIAGRAMS.md) относительно папки описания слайда: SVG рисует движок при сборке в размер места; только kind: схема, вместо file.",
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {"enum": ["схема", "карта", "план", "аксонометрия", "фотомонтаж", "рендер", "фото", "логотип", "легенда"]},
+        "source": {"type": "string", "minLength": 1},
+        "caption": {
+          "description": "Первая строка подписи: «N. Название»; строка или {text, fact_ids}.",
+          "if": {"type": "string"},
+          "then": {"type": "string", "minLength": 1},
+          "else": {"$ref": "#/$defs/text_ids"}
+        },
+        "date": {"description": "Месяц и год (05.2026) или год; нет документа — «нужен документ».", "type": "string", "minLength": 1},
+        "point": {"description": "Номер точки съемки на карте; в подписи — «точка N». Нет документа — «нужен документ»: с датой без документа в подписи — «дата и точка: нужен документ».", "type": "string", "minLength": 1}
+      },
+      "required": ["kind", "source"],
+      "additionalProperties": false,
+      "oneOf": [{"required": ["file"]}, {"required": ["diagram"]}],
+      "if": {"required": ["diagram"]},
+      "then": {"properties": {"kind": {"const": "схема"}}}
+    },
+    "chart": {
+      "description": "Диаграмма по tokens/chart.yaml: сообщение, тип, что измерено, единица, категории и ряды показателей.",
+      "type": "object",
+      "properties": {
+        "message": {
+          "description": "Что доказывает диаграмма; тип выбирается от сообщения (tokens/chart.yaml: messages).",
+          "enum": ["сравнение", "ранжирование", "динамика", "доля", "распределение", "связь", "отклонение"]
+        },
+        "kind": {
+          "description": "Тип из разрешенных для сообщения; по умолчанию первый из них.",
+          "enum": ["bar_clustered", "column_clustered", "line", "line_markers", "xy_scatter_lines", "xy_scatter_lines_no_markers", "area", "bar_stacked_100", "bar_stacked", "column_stacked_100", "column_stacked", "xy_scatter"]
+        },
+        "measure": {"description": "Что измерено; заголовок диаграммы — «measure, unit».", "type": "string", "minLength": 1},
+        "unit": {"description": "Единица всех значений; у каждого показателя та же.", "type": "string", "minLength": 1},
+        "categories": {
+          "description": "Подписи категорий; у точечных диаграмм — значения оси X.",
+          "type": "array",
+          "minItems": 1,
+          "items": {"oneOf": [{"type": "string", "minLength": 1}, {"$ref": "#/$defs/indicator"}]}
+        },
+        "series": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/series"}},
+        "highlight": {
+          "description": "Номер категории (с нуля), выделенной акцентом; только у диаграммы с одним рядом.",
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": ["message", "measure", "unit", "categories", "series"],
+      "additionalProperties": false
+    },
+    "series": {
+      "description": "Ряд диаграммы: имя и по показателю на каждую категорию.",
+      "type": "object",
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "values": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/indicator"}}
+      },
+      "required": ["name", "values"],
+      "additionalProperties": false
+    },
+    "legend": {
+      "description": "Легенда карты: строки «образец цвета — подпись» сверху вниз.",
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/legend_item"}
+    },
+    "legend_item": {
+      "description": "Строка легенды: слой из tokens/map.yaml (layers) или цвет из tokens/style.yaml (colors) и подпись. У слоя с категориями (map.yaml: zoning) строка — категория: {layer: zoning, category: Ж}, образец — заливка категории, подпись по умолчанию — название категории из map.yaml.",
+      "type": "object",
+      "properties": {
+        "layer": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+        "category": {"type": "string", "minLength": 1},
+        "color": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+        "label": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false,
+      "oneOf": [
+        {"required": ["layer"]},
+        {"required": ["color"]}
+      ],
+      "dependentRequired": {"category": ["layer"]},
+      "anyOf": [
+        {"required": ["label"]},
+        {"required": ["category"]}
+      ]
+    }
+  }
+}
