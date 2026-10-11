@@ -50,25 +50,29 @@
   "additionalProperties": false,
   "$defs": {
     "place": {
-      "description": "Вид содержимого — по форме: строка или объект с text — текст, список — легенда, объект с columns — таблица, с file, diagram или overlay — картинка, с series или message — диаграмма, иначе — крупное число.",
+      "description": "Вид содержимого — по форме: строка или объект с text — текст, список или объект с layers_of — легенда, объект с columns — таблица, с file, diagram или overlay — картинка, с series или message — диаграмма, иначе — крупное число.",
       "if": {"type": "string"},
       "then": {"$ref": "#/$defs/text"},
       "else": {
         "if": {"type": "array"},
         "then": {"$ref": "#/$defs/legend"},
         "else": {
-          "if": {"required": ["columns"]},
-          "then": {"$ref": "#/$defs/table"},
+          "if": {"required": ["layers_of"]},
+          "then": {"$ref": "#/$defs/legend_of"},
           "else": {
-            "if": {"anyOf": [{"required": ["file"]}, {"required": ["diagram"]}, {"required": ["overlay"]}]},
-            "then": {"$ref": "#/$defs/image"},
+            "if": {"required": ["columns"]},
+            "then": {"$ref": "#/$defs/table"},
             "else": {
-              "if": {"anyOf": [{"required": ["series"]}, {"required": ["message"]}]},
-              "then": {"$ref": "#/$defs/chart"},
+              "if": {"anyOf": [{"required": ["file"]}, {"required": ["diagram"]}, {"required": ["overlay"]}]},
+              "then": {"$ref": "#/$defs/image"},
               "else": {
-                "if": {"required": ["text"]},
-                "then": {"$ref": "#/$defs/text_ids"},
-                "else": {"$ref": "#/$defs/number"}
+                "if": {"anyOf": [{"required": ["series"]}, {"required": ["message"]}]},
+                "then": {"$ref": "#/$defs/chart"},
+                "else": {
+                  "if": {"required": ["text"]},
+                  "then": {"$ref": "#/$defs/text_ids"},
+                  "else": {"$ref": "#/$defs/number"}
+                }
               }
             }
           }
@@ -300,6 +304,15 @@
       "type": "array",
       "minItems": 1,
       "items": {"$ref": "#/$defs/legend_item"}
+    },
+    "legend_of": {
+      "description": "Легенда слоев карты листа из ее overlay: id места картинки с overlay, чей overlay.json (legend) дает строки легенды. Строки пишутся один раз — в overlay.json, а не еще раз в описании слайда.",
+      "type": "object",
+      "properties": {
+        "layers_of": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"}
+      },
+      "required": ["layers_of"],
+      "additionalProperties": false
     },
     "legend_item": {
       "description": "Строка легенды: слой из tokens/map.yaml (layers) или цвет из tokens/style.yaml (colors) и подпись. У слоя с категориями (map.yaml: zoning) строка — категория: {layer: zoning, category: Ж}, образец — заливка категории, подпись по умолчанию — название категории из map.yaml.",
