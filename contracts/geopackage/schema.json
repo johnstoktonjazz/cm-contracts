@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "cm-contracts/geopackage/1.1.0",
+  "$id": "cm-contracts/geopackage/1.2.0",
   "title": "Геопакет проекта: слои, геометрия и поля",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Описывает один файл <project>.gpkg в виде JSON-выгрузки (example.json). Как это лежит в самом GPKG — README, «Хранение». Проверяется скриптом картографа при каждой сборке.",
   "type": "object",
   "required": [
@@ -13,7 +13,7 @@
   "additionalProperties": false,
   "properties": {
     "contract": {
-      "const": "geopackage/1.1.0"
+      "const": "geopackage/1.2.0"
     },
     "crs": {
       "type": "string",
@@ -273,6 +273,17 @@
                           },
                           "land_category": {
                             "type": "string"
+                          },
+                          "hazard_class": {
+                            "type": "string",
+                            "enum": [
+                              "I",
+                              "II",
+                              "III",
+                              "IV",
+                              "V"
+                            ],
+                            "description": "класс опасности предприятия на участке (СЗЗ); вводит автор проекта"
                           }
                         }
                       }
@@ -484,6 +495,27 @@
                           },
                           "tunnel": {
                             "type": "boolean"
+                          },
+                          "oneway": {
+                            "type": "boolean",
+                            "description": "одностороннее движение по направлению линии"
+                          },
+                          "bridge": {
+                            "type": "boolean",
+                            "description": "мост или путепровод: пересечение без перекрестка"
+                          },
+                          "road_category": {
+                            "type": "string",
+                            "enum": [
+                              "IА",
+                              "IБ",
+                              "IВ",
+                              "II",
+                              "III",
+                              "IV",
+                              "V"
+                            ],
+                            "description": "категория автомобильной дороги (СП 34.13330: IА, IБ, IВ — кириллица, II–V) для придорожной полосы; вводит автор проекта, иначе — ASM соответствия класса улицы"
                           }
                         }
                       }
@@ -674,6 +706,10 @@
                               "canal",
                               "other"
                             ]
+                          },
+                          "length_km": {
+                            "type": "number",
+                            "description": "длина водотока от истока до устья, км (водоохранная зона); вводит автор проекта или документ"
                           }
                         }
                       }
@@ -874,6 +910,17 @@
                             "items": {
                               "type": "string"
                             }
+                          },
+                          "hazard_class": {
+                            "type": "string",
+                            "enum": [
+                              "I",
+                              "II",
+                              "III",
+                              "IV",
+                              "V"
+                            ],
+                            "description": "класс опасности объекта (СЗЗ); вводит автор проекта"
                           }
                         }
                       }
@@ -1170,7 +1217,7 @@
         },
         "source_license": {
           "type": "string",
-          "description": "лицензия внешнего источника (ODbL 1.0, CDLA-Permissive-2.0 …); обязательна при status=reference"
+          "description": "лицензия внешнего источника (ODbL 1.0, CDLA-Permissive-2.0 …); обязательна у reference; у calc — если расчет от внешних данных, у расчета от документов проекта не пишется"
         },
         "fact_ids": {
           "type": "array",
@@ -1209,20 +1256,6 @@
             "properties": {
               "status": {
                 "const": "reference"
-              }
-            }
-          },
-          "then": {
-            "required": [
-              "source_license"
-            ]
-          }
-        },
-        {
-          "if": {
-            "properties": {
-              "status": {
-                "const": "calc"
               }
             }
           },
