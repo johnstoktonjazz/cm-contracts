@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "cm-contracts/overlay/1.1.0",
+  "$id": "cm-contracts/overlay/1.2.0",
   "title": "Слои карты поверх подложки (overlay.json): редактируемые элементы в координатах места макета",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Все, что на карте кроме подложки. Координаты — миллиметры от левого верхнего угла места макета, ось y вниз. Верстка рисует это нативными фигурами и текстом PowerPoint; картограф пересчитывает из системы координат карты.",
   "type": "object",
   "required": [
@@ -164,7 +164,7 @@
           "type": "array",
           "items": {
             "type": "string",
-            "pattern": "^(F-[0-9]{6}|CALC-[0-9]{5}|NORM-[0-9]{5}|ASM-[0-9]{4})$"
+            "pattern": "^(F-[0-9]{6}|CALC-[0-9]{5}|NRM-[0-9]{5}|NORM-[0-9]{5}|ASM-[0-9]{4})$"
           }
         },
         "simplify_mm": {
@@ -260,7 +260,7 @@
                 "type": "array",
                 "items": {
                   "type": "string",
-                  "pattern": "^(F-[0-9]{6}|CALC-[0-9]{5}|NORM-[0-9]{5}|ASM-[0-9]{4})$"
+                  "pattern": "^(F-[0-9]{6}|CALC-[0-9]{5}|NRM-[0-9]{5}|NORM-[0-9]{5}|ASM-[0-9]{4})$"
                 },
                 "description": "записи реестра об этом объекте"
               }

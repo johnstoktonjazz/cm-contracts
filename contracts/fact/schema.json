@@ -1,16 +1,16 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "cm-contracts/fact/1.0.0",
+  "$id": "cm-contracts/fact/1.1.0",
   "title": "Запись реестра: факт, расчет, норма, допущение",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "object",
   "required": ["id", "kind", "value", "status", "sources"],
   "additionalProperties": false,
   "properties": {
     "id": {
       "type": "string",
-      "pattern": "^(F-[0-9]{6}|CALC-[0-9]{5}|NORM-[0-9]{5}|ASM-[0-9]{4})$",
-      "description": "F — факт из документа, CALC — вычисленное значение, NORM — требование нормы, ASM — допущение автора проекта"
+      "pattern": "^(F-[0-9]{6}|CALC-[0-9]{5}|NRM-[0-9]{5}|NORM-[0-9]{5}|ASM-[0-9]{4})$",
+      "description": "F — факт из документа, CALC — вычисленное значение, NRM — требование нормы (NORM — префикс 1.0.0, устаревает: принимается до перехода slide, убрать в 2.0.0), ASM — допущение автора проекта"
     },
     "kind": { "type": "string", "enum": ["fact", "calc", "norm", "assumption"] },
     "subject": {
@@ -44,19 +44,29 @@
           "page": { "type": "integer", "minimum": 1 },
           "clause": { "type": "string", "description": "пункт, статья, таблица, строка" },
           "doc_class": { "type": "string", "pattern": "^[A-J]$", "description": "класс документа по правилам актуальности ядра" },
-          "doc_status": { "type": "string", "enum": ["approved", "draft", "external", "reference"], "description": "утвержден, проект, чужой документ, справочный источник" }
+          "doc_status": { "type": "string", "enum": ["approved", "draft", "superseded", "unknown", "external", "reference"], "description": "approved — утвержден; draft — проект или рабочий; superseded — устарел (заменен новой редакцией); unknown — статус неизвестен; external — чужой документ; reference — справочный источник" }
         }
       }
     },
     "inputs": {
       "type": "array",
-      "items": { "type": "string", "pattern": "^(F-[0-9]{6}|CALC-[0-9]{5}|NORM-[0-9]{5}|ASM-[0-9]{4})$" },
+      "items": { "type": "string", "pattern": "^(F-[0-9]{6}|CALC-[0-9]{5}|NRM-[0-9]{5}|NORM-[0-9]{5}|ASM-[0-9]{4})$" },
       "description": "только для CALC: идентификаторы входов"
     },
     "formula": { "type": "string", "description": "только для CALC: формула словами или выражением с идентификаторами входов" },
     "applicability": {
-      "type": "string",
-      "description": "только для NORM: условия применения словами (территориальная группа, категория города, тип объекта); статус проверки — в status"
+      "type": "object",
+      "required": ["condition", "status"],
+      "additionalProperties": false,
+      "description": "только для NRM: условия применения и проверка применимости к объекту проекта. status записи — сверка значения с документом; applicability.status — применимость: верно процитированная норма может быть неприменима",
+      "properties": {
+        "condition": { "type": "string", "description": "условия применения словами, как в документе: территориальная группа, категория населенного пункта, тип объекта, зона" },
+        "exceptions": { "type": "string", "description": "исключения и оговорки документа" },
+        "status": { "type": "string", "enum": ["unchecked", "applicable", "not_applicable"], "description": "не проверено, применимо, неприменимо" },
+        "note": { "type": "string", "description": "основание статуса: решение, недостающий документ, допущение" },
+        "checked_by": { "type": "string" },
+        "checked_at": { "type": "string", "format": "date" }
+      }
     },
     "author": { "type": "string", "description": "только для ASM: кто принял допущение" },
     "date": { "type": "string", "format": "date", "description": "дата записи или допущения" },
@@ -67,6 +77,7 @@
   "allOf": [
     { "if": { "properties": { "kind": { "const": "calc" } } }, "then": { "required": ["inputs", "formula"] } },
     { "if": { "properties": { "kind": { "const": "assumption" } } }, "then": { "required": ["author", "date"] } },
+    { "if": { "properties": { "kind": { "const": "norm" } } }, "then": { "required": ["applicability"] } },
     { "if": { "properties": { "status": { "const": "conflict" } } }, "then": { "required": ["conflicts_with"] } }
   ]
 }
