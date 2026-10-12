@@ -26,7 +26,7 @@
 | `parcels` | MultiPolygon | земельные участки ЕГРН, без правообладателей | `cadastral_number`, `permitted_use`, `land_category` |
 | `buildings_cadastre` | MultiPolygon | ОКС ЕГРН | `cadastral_number`, `purpose`, `floors` |
 | `zouit` | MultiPolygon | ЗОУИТ, включая зоны охраны ОКН | `zouit_type`, `registry_number` |
-| `zones_pzz` | MultiPolygon | территориальные зоны ПЗЗ | `zone` (Ж, ОЖ, ОД, П, ИТ, Р, СН), `code` |
+| `zones_pzz` | MultiPolygon | территориальные зоны ПЗЗ | `zone` (Ж, ОЖ, ОД, П, ИТ, Р, СН, СХ), `code` |
 | `zones_genplan` | MultiPolygon | функциональные зоны генплана | `zone`, `code` |
 | `roads` | MultiLineString | улично-дорожная сеть | `road_class`, `tunnel` |
 | `rail` | MultiLineString | железные дороги и трамвай | `rail_class`, `tunnel` |
@@ -74,6 +74,8 @@
 - `source_license` у `calc` — только если расчет от внешних данных (изохрона по OSM); у расчета от документов проекта (буфер от участка КПТ) лицензии нет и поле не пишется.
 - Атрибуты, которые вводит автор проекта (или документ): `parcels.hazard_class`, `poi_other.hazard_class` (класс опасности для СЗЗ, I–V), `roads.road_category` (IА, IБ, IВ, II–V для придорожной полосы; без нее — соответствие класса улицы категории — допущение ASM), `water.length_km` (длина водотока для водоохранной зоны).
 - `roads.oneway`, `roads.bridge` — из источника (OSM): односторонность для автомобильного графа, мост — пересечение без перекрестка.
+- `zone` у `zones_pzz` и `zones_genplan`: категория `СХ` — сельскохозяйственного использования (дефект стыка 4 строителя, 12.10).
+- `fact_ids`: нормы — `NRM-NNNNN` (контракт `fact` 1.1.0 базы); прежний `NORM-NNNNN` принимается переходно.
 
 ## Что запрещено
 
